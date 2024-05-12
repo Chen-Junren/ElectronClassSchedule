@@ -1,4 +1,4 @@
-var weekIndex = localStorage.getItem('weekIndex')
+﻿var weekIndex = localStorage.getItem('weekIndex')
 if (weekIndex === null) localStorage.setItem('weekIndex', '0')
 weekIndex = Number(localStorage.getItem('weekIndex'))
 
@@ -14,6 +14,10 @@ var setDayOffsetLastDay = localStorage.getItem('setDayOffsetLastDay')
 if (setDayOffsetLastDay === null) localStorage.setItem('setDayOffsetLastDay', '-1')
 setDayOffsetLastDay = Number(localStorage.getItem('setDayOffsetLastDay'))
 
+function randomRollCall()
+{
+    return Math.floor(Math.random()*43)+1
+}
 
 function getCurrentEditedDate() {
     let d = new Date();

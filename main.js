@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, ipcMain, dialog, screen, Tray, shell } = require('electron')
+﻿const { app, BrowserWindow, Menu, ipcMain, dialog, screen, Tray, shell } = require('electron')
 const path = require('path');
 const fs = require('fs')
 const os = require('os')
@@ -16,7 +16,7 @@ let basePath = app.isPackaged ? './resources/app/' : './'
 if (!app.requestSingleInstanceLock({ key: 'classSchedule' })) {
     app.quit();
 }
-const createWindow = () => {
+const createWindow = key => {
     win = new BrowserWindow({
         x: 0,
         y: 0,
@@ -73,33 +73,27 @@ ipcMain.on('getWeekIndex', (e, arg) => {
     tray = new Tray(basePath + 'image/icon.png')
     template = [
         {
-            label: '第一周',
+            label: '单周',
             type: 'radio',
             click: () => {
                 win.webContents.send('setWeekIndex', 0)
             }
         },
         {
-            label: '第二周',
+            label: '双周',
             type: 'radio',
             click: () => {
                 win.webContents.send('setWeekIndex', 1)
             }
         },
         {
-            label: '第三周',
+            label: '调课课表',
             type: 'radio',
             click: () => {
                 win.webContents.send('setWeekIndex', 2)
             }
         },
-        {
-            label: '第四周',
-            type: 'radio',
-            click: () => {
-                win.webContents.send('setWeekIndex', 3)
-            }
-        },
+        
         {
             type: 'separator'
         },
@@ -124,13 +118,7 @@ ipcMain.on('getWeekIndex', (e, arg) => {
                 win.webContents.send('setDayOffset')
             }
         },
-        {
-            icon: basePath + 'image/github.png',
-            label: '源码仓库',
-            click: () => {
-                shell.openExternal('https://github.com/EnderWolf006/ElectronClassSchedule');
-            }
-        },
+
         {
             type: 'separator'
         },
@@ -193,7 +181,7 @@ ipcMain.on('getWeekIndex', (e, arg) => {
     ]
     template[arg].checked = true
     form = Menu.buildFromTemplate(template)
-    tray.setToolTip('电子课表 - by lsl')
+    tray.setToolTip('电子课表')
     function trayClicked() {
         tray.popUpContextMenu(form)
     }
