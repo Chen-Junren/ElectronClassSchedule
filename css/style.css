@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2025. Chen Junren. All rights reserved.
+ * This software is the proprietary information of Chen Junren.
+ * Unauthorized use, reproduction, or distribution of this software
+ * without prior written permission is strictly prohibited.
+ * For authorized use, the following license applies: GNU GPL v3.0
+ * For the full GPL license, read the LINCENSE file.
+ * THIS SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,  ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
 @font-face {
     font-family: JETB;
     src: url("../font/JETBRAINSMONO-BOLD.TTF");
