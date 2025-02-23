@@ -42,7 +42,7 @@
 }
 
 .classContainer {
-    font-family: YouYuan;
+    font-family: YouYuan, sans-serif;
     position: relative;
     display: flex;
     flex-direction: row;
@@ -53,7 +53,7 @@
 .globalContainer {
     position: fixed;
     top: var(--top-space);
-    left: 50%;
+    left: 46%;
     transform: translateX(-50%);
 }
 
@@ -91,7 +91,7 @@
     /* height: 100%; */
     position: absolute;
     top: 0;
-    font-family: Ali;
+    font-family: Ali, sans-serif;
 }
 
 .rightSidebar {
@@ -110,9 +110,21 @@
     display: inline;
     font-size: var(--corner-font-size);
     color: rgba(255, 255, 255, 1);
-    font-family: Sou;
+    font-family: Sou, sans-serif;
 }
+.centerText {
+    display: inline;
+    font-size: var(--days-font-size);
+    color: rgba(255, 255, 255, 1);
+    font-family: Sou, sans-serif;
 
+}
+.centerInfo {
+    display: inline;
+    font-size: var(--days-font-size);
+    color: rgba(255, 255, 255, 1);
+    font-family: YouYuan, sans-serif;
+}
 .countdownContainer {
     position: absolute;
     transition: all 2s;
@@ -140,7 +152,7 @@
 .currentClass {
     color: rgba(0, 255, 10, 1);
     display: inline;
-    font-family: Sou;
+    font-family: Sou, sans-serif;
     transition: all 2s;
     font-weight: bold;
 }
@@ -148,7 +160,7 @@
 .countdown {
     color: rgba(255, 255, 255, 1);
     display: inline;
-    font-family: JETB;
+    font-family: JETB, sans-serif;
 }
 
 .miniCountdown {
@@ -160,7 +172,7 @@
     background-color: rgba(0, 0, 0, var(--global-bg-opacity));
     padding: var(--countdown-bg-padding);
     font-size: var(--countdown-font-size);
-    font-family: JETB;
+    font-family: JETB, sans-serif;
     color: #FFF;
     display: none;
 }
