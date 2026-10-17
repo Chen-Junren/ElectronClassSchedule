@@ -74,7 +74,7 @@ test('dialog replies with the original request and selected index', async () => 
         sender: { isDestroyed: () => false },
         reply: (...args) => replies.push(args)
     };
-    const request = { reply: 'getSelectedClassIndex', options: { buttons: ['A', 'B'], defaultId: 0 } };
+    const request = { reply: 'getSelectedClassIndex', options: { title: 'Choose', message: 'Select one', buttons: ['A', 'B'], defaultId: 0 } };
 
     handlers.get('dialog')(event, request);
     await new Promise(resolve => setImmediate(resolve));
