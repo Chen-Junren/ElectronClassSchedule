@@ -11,7 +11,7 @@ const { createTrayManager } = require('./electron/registerTray');
 const store = new Store();
 let win;
 
-const basePath = app.isPackaged ? './resources/app/' : './';
+const basePath = __dirname + path.sep;
 const getWindow = () => win;
 const getBasePath = () => basePath;
 
@@ -47,7 +47,7 @@ function createWindow() {
         }
     });
 
-    win.loadFile('index.html');
+    win.loadFile(path.join(__dirname, 'index.html'));
 
     if (store.get('isWindowAlwaysOnTop', true)) {
         win.setAlwaysOnTop(true, 'screen-saver', 9999999999999);
