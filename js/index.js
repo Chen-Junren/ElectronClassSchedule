@@ -15,8 +15,9 @@ function getCurrentEditedDate() {
 function getCurrentEditedDay(date) {
     const actualToday = new Date().getDay();
     const effectiveDay = AppStateStore.getEffectiveDay(localStorage, date, actualToday);
-    dayOffset = AppStateStore.loadState(localStorage).dayOffset;
-    setDayOffsetLastDay = AppStateStore.loadState(localStorage).setDayOffsetLastDay;
+    const state = AppStateStore.loadState(localStorage);
+    dayOffset = state.dayOffset;
+    setDayOffsetLastDay = state.setDayOffsetLastDay;
     return effectiveDay;
 }
 
