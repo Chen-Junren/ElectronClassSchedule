@@ -77,63 +77,9 @@ function getCurrentTime() {
 function getScheduleData() {
     const currentSchedule = getCurrentDaySchedule();
     const currentTime = getCurrentTime();
-    // let currentTime = '07:10:01';
     const dayOfWeek = getCurrentEditedDay(getCurrentEditedDate());
-    const timetable = scheduleConfig.daily_class[dayOfWeek].timetable
-    const dayTimetable = scheduleConfig.timetable[timetable];
-    const divider = scheduleConfig.divider[timetable];
-    let scheduleArray = [];
-    let currentHighlight = { index: null, type: null, fullName: null, countdown: null, countdownText: null };
-    Object.keys(dayTimetable).forEach((timeRange, index) => {
-        const [startTime, endTime] = timeRange.split('-');
-        const classIndex = dayTimetable[timeRange];
-
-        if (typeof classIndex === 'number') {
-            const subjectShortName = currentSchedule[classIndex];
-            const subjectFullName = scheduleConfig.subject_name[subjectShortName];
-            scheduleArray.push(subjectShortName);
-
-            if (isClassCurrent(startTime, endTime, currentTime)) {
-                currentHighlight.index = scheduleArray.length - 1;
-                currentHighlight.type = 'current';
-                currentHighlight.fullName = subjectFullName;
-                currentHighlight.countdown = calculateCountdown(endTime, currentTime);
-                currentHighlight.countdownText = formatCountdown(currentHighlight.countdown);
-            }
-        } else if (currentHighlight.index === null && isBreakTime(startTime, endTime, currentTime)) {
-            let highlighted = false;
-            for (let i = index + 1; i < Object.keys(dayTimetable).length; i++) {
-                const nextTimeRange = Object.keys(dayTimetable)[i];
-                const nextClassIndex = dayTimetable[nextTimeRange];
-                if (typeof nextClassIndex === 'number') {
-                    currentHighlight.index = scheduleArray.length;
-                    currentHighlight.type = 'upcoming';
-                    const nextSubjectShortName = currentSchedule[nextClassIndex];
-                    const nextSubjectFullName = scheduleConfig.subject_name[nextSubjectShortName];
-                    currentHighlight.fullName = dayTimetable[timeRange];
-                    const [nextStartTime] = nextTimeRange.split('-');
-                    currentHighlight.countdown = calculateCountdown(timeRange.split('-')[1], currentTime);
-                    currentHighlight.countdownText = formatCountdown(currentHighlight.countdown);
-                    highlighted = true;
-                    break;
-                }
-            }
-            if (!highlighted) {
-                currentHighlight.index = currentSchedule.length - 1;
-                currentHighlight.type = 'upcoming';
-                currentHighlight.fullName = dayTimetable[timeRange];
-                currentHighlight.countdown = calculateCountdown(timeRange.split('-')[1], currentTime);
-                currentHighlight.countdownText = formatCountdown(currentHighlight.countdown);
-                currentHighlight.isEnd = true;
-            }
-        } else if (currentHighlight.index === null && !dayTimetable[timeRange]) {
-            // 当前时间是非课程时间（如课间休息）
-            currentHighlight.fullName = currentSchedule[classIndex]; // 使用时间表中的描述
-        }
-    });
-    return { scheduleArray, currentHighlight, timetable, divider };
+    return ScheduleEngine.buildScheduleData(scheduleConfig, currentSchedule, currentTime, dayOfWeek);
 }
-
 
 function calculateCountdown(targetTime, currentTime) {
     return ScheduleEngine.calculateCountdown(targetTime, currentTime);
