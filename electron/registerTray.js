@@ -1,6 +1,10 @@
-const { Menu, Tray, shell } = require('electron');
-
-function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, Menu: menuApi = Menu, Tray: trayApi = Tray, shell: shellApi = shell }) {
+function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, Menu: menuApi, Tray: trayApi, shell: shellApi }) {
+    if (!menuApi || !trayApi || !shellApi) {
+        const electron = require('electron');
+        menuApi = menuApi || electron.Menu;
+        trayApi = trayApi || electron.Tray;
+        shellApi = shellApi || electron.shell;
+    }
     let tray;
     let form;
 
