@@ -1,39 +1,23 @@
 scheduleConfig = ScheduleConfigStore.loadConfig(_scheduleConfig, localStorage);
 
-var weekIndex = localStorage.getItem('weekIndex')
-if (weekIndex === null) localStorage.setItem('weekIndex', '0')
-weekIndex = Number(localStorage.getItem('weekIndex'))
-
-var timeOffset = localStorage.getItem('timeOffset')
-if (timeOffset === null) localStorage.setItem('timeOffset', '0')
-timeOffset = Number(localStorage.getItem('timeOffset'))
-
-var dayOffset = localStorage.getItem('dayOffset')
-if (dayOffset === null) localStorage.setItem('dayOffset', '-1')
-dayOffset = Number(localStorage.getItem('dayOffset'))
-
-var setDayOffsetLastDay = localStorage.getItem('setDayOffsetLastDay')
-if (setDayOffsetLastDay === null) localStorage.setItem('setDayOffsetLastDay', '-1')
-setDayOffsetLastDay = Number(localStorage.getItem('setDayOffsetLastDay'))
-
+const initialAppState = AppStateStore.loadState(localStorage);
+var weekIndex = initialAppState.weekIndex;
+var timeOffset = initialAppState.timeOffset;
+var dayOffset = initialAppState.dayOffset;
+var setDayOffsetLastDay = initialAppState.setDayOffsetLastDay;
 
 function getCurrentEditedDate() {
-    let d = new Date();
-    d.setSeconds(d.getSeconds() + timeOffset)
-    return d;
+    const date = new Date();
+    date.setSeconds(date.getSeconds() + timeOffset);
+    return date;
 }
 
 function getCurrentEditedDay(date) {
-    if (dayOffset === -1) 
-        return date.getDay();
-    if (setDayOffsetLastDay == new Date().getDay()) {
-        return dayOffset;
-    }
-    localStorage.setItem('dayOffset', '-1')
-    localStorage.setItem('setDayOffsetLastDay', '-1')
-    dayOffset = -1
-    setDayOffsetLastDay = -1
-    return date.getDay();
+    const actualToday = new Date().getDay();
+    const effectiveDay = AppStateStore.getEffectiveDay(localStorage, date, actualToday);
+    dayOffset = AppStateStore.loadState(localStorage).dayOffset;
+    setDayOffsetLastDay = AppStateStore.loadState(localStorage).setDayOffsetLastDay;
+    return effectiveDay;
 }
 
 function isBreakTime(startTime, endTime, currentTime) {
