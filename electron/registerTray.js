@@ -23,26 +23,33 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 tray.on('right-click', showMenu);
             }
 
+            const sendToWindow = (channel, ...args) => {
+                const currentWindow = getWindow();
+                if (currentWindow && !currentWindow.isDestroyed()) {
+                    currentWindow.webContents.send(channel, ...args);
+                }
+            };
+
             const template = [
-                { label: '第一周', type: 'radio', click: () => win.webContents.send('setWeekIndex', 0) },
-                { label: '第二周', type: 'radio', click: () => win.webContents.send('setWeekIndex', 1) },
-                { label: '第三周', type: 'radio', click: () => win.webContents.send('setWeekIndex', 2) },
-                { label: '第四周', type: 'radio', click: () => win.webContents.send('setWeekIndex', 3) },
+                { label: '第一周', type: 'radio', click: () => sendToWindow('setWeekIndex', 0) },
+                { label: '第二周', type: 'radio', click: () => sendToWindow('setWeekIndex', 1) },
+                { label: '第三周', type: 'radio', click: () => sendToWindow('setWeekIndex', 2) },
+                { label: '第四周', type: 'radio', click: () => sendToWindow('setWeekIndex', 3) },
                 { type: 'separator' },
                 {
                     icon: getBasePath() + 'image/setting.png',
                     label: '配置课表',
-                    click: () => win.webContents.send('openSettingDialog')
+                    click: () => sendToWindow('openSettingDialog')
                 },
                 {
                     icon: getBasePath() + 'image/clock.png',
                     label: '矫正计时',
-                    click: () => win.webContents.send('getTimeOffset')
+                    click: () => sendToWindow('getTimeOffset')
                 },
                 {
                     icon: getBasePath() + 'image/toggle.png',
                     label: '切换日程',
-                    click: () => win.webContents.send('setDayOffset')
+                    click: () => sendToWindow('setDayOffset')
                 },
                 {
                     icon: getBasePath() + 'image/github.png',
@@ -57,7 +64,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     checked: store.get('isDuringClassCountdown', true),
                     click: (event) => {
                         store.set('isDuringClassCountdown', event.checked);
-                        win.webContents.send('ClassCountdown', event.checked);
+                        sendToWindow('ClassCountdown', event.checked);
                     }
                 },
                 {
@@ -66,10 +73,12 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     checked: store.get('isWindowAlwaysOnTop', true),
                     click: (event) => {
                         store.set('isWindowAlwaysOnTop', event.checked);
+                        const currentWindow = getWindow();
+                        if (!currentWindow || currentWindow.isDestroyed()) return;
                         if (store.get('isWindowAlwaysOnTop', true)) {
-                            win.setAlwaysOnTop(true, 'screen-saver', 9999999999999);
+                            currentWindow.setAlwaysOnTop(true, 'screen-saver', 9999999999999);
                         } else {
-                            win.setAlwaysOnTop(false);
+                            currentWindow.setAlwaysOnTop(false);
                         }
                     }
                 },
@@ -79,7 +88,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     checked: store.get('isDuringClassHidden', true),
                     click: (event) => {
                         store.set('isDuringClassHidden', event.checked);
-                        win.webContents.send('ClassHidden', event.checked);
+                        sendToWindow('ClassHidden', event.checked);
                     }
                 },
                 {
@@ -96,27 +105,31 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     icon: getBasePath() + 'image/quit.png',
                     label: '退出程序',
                     click: () => {
-                        dialog.showMessageBox(win, {
+                        const currentWindow = getWindow();
+                        if (!currentWindow || currentWindow.isDestroyed()) return;
+                        dialog.showMessageBox(currentWindow, {
                             title: '请确认',
                             message: '你确定要退出程序吗?',
                             buttons: ['取消', '确定']
                         }).then((result) => {
-                            if (result.response) app.quit();
+                            if (result.response === 1) app.quit();
+                        }).catch((error) => {
+                            console.error('[tray] Failed to show quit confirmation:', error);
                         });
                     }
                 }
             ];
 
             const selectedWeek = Number(arg);
-            if (Number.isInteger(selectedWeek) && template[selectedWeek] && template[selectedWeek].type === 'radio') {
+            if (Number.isInteger(selectedWeek) && selectedWeek >= 0 && selectedWeek <= 3) {
                 template[selectedWeek].checked = true;
             }
 
             form = Menu.buildFromTemplate(template);
             tray.setContextMenu(form);
 
-            win.webContents.send('ClassCountdown', store.get('isDuringClassCountdown', true));
-            win.webContents.send('ClassHidden', store.get('isDuringClassHidden', true));
+            sendToWindow('ClassCountdown', store.get('isDuringClassCountdown', true));
+            sendToWindow('ClassHidden', store.get('isDuringClassHidden', true));
         });
     }
 
