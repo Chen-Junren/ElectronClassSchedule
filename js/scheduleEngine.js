@@ -72,6 +72,80 @@
         return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
     }
 
+    function buildScheduleData(config, currentSchedule, currentTime, dayOfWeek) {
+        const dailyClass = config.daily_class[dayOfWeek];
+        const emptyHighlight = {
+            index: null,
+            type: null,
+            fullName: null,
+            countdown: null,
+            countdownText: null
+        };
+
+        if (!dailyClass) {
+            return {
+                scheduleArray: [],
+                currentHighlight: emptyHighlight,
+                timetable: undefined,
+                divider: undefined
+            };
+        }
+
+        const timetable = dailyClass.timetable;
+        const dayTimetable = config.timetable[timetable] || {};
+        const divider = config.divider[timetable];
+        const timeRanges = Object.keys(dayTimetable);
+        const scheduleArray = [];
+        const currentHighlight = { ...emptyHighlight };
+
+        timeRanges.forEach((timeRange, index) => {
+            const [startTime, endTime] = timeRange.split('-');
+            const classIndex = dayTimetable[timeRange];
+
+            if (typeof classIndex === 'number') {
+                const subjectShortName = currentSchedule[classIndex];
+                scheduleArray.push(subjectShortName);
+
+                if (isTimeInRange(startTime, endTime, currentTime)) {
+                    currentHighlight.index = scheduleArray.length - 1;
+                    currentHighlight.type = 'current';
+                    currentHighlight.fullName = config.subject_name[subjectShortName];
+                    currentHighlight.countdown = calculateCountdown(endTime, currentTime);
+                    currentHighlight.countdownText = formatCountdown(currentHighlight.countdown);
+                }
+            } else if (currentHighlight.index === null &&
+                isTimeInRange(startTime, endTime, currentTime)) {
+                let foundNextClass = false;
+
+                for (let i = index + 1; i < timeRanges.length; i++) {
+                    const nextTimeRange = timeRanges[i];
+                    const nextClassIndex = dayTimetable[nextTimeRange];
+
+                    if (typeof nextClassIndex === 'number') {
+                        currentHighlight.index = scheduleArray.length;
+                        currentHighlight.type = 'upcoming';
+                        currentHighlight.fullName = dayTimetable[timeRange];
+                        currentHighlight.countdown = calculateCountdown(endTime, currentTime);
+                        currentHighlight.countdownText = formatCountdown(currentHighlight.countdown);
+                        foundNextClass = true;
+                        break;
+                    }
+                }
+
+                if (!foundNextClass) {
+                    currentHighlight.index = currentSchedule.length - 1;
+                    currentHighlight.type = 'upcoming';
+                    currentHighlight.fullName = dayTimetable[timeRange];
+                    currentHighlight.countdown = calculateCountdown(endTime, currentTime);
+                    currentHighlight.countdownText = formatCountdown(currentHighlight.countdown);
+                    currentHighlight.isEnd = true;
+                }
+            }
+        });
+
+        return { scheduleArray, currentHighlight, timetable, divider };
+    }
+
     return {
         toMinutes,
         isTimeInRange,
@@ -79,6 +153,7 @@
         isClassCurrent: isTimeInRange,
         getNextClassIndex,
         calculateCountdown,
-        formatCountdown
+        formatCountdown,
+        buildScheduleData
     };
 }));
