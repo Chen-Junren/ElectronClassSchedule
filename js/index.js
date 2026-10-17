@@ -1,3 +1,5 @@
+scheduleConfig = ScheduleConfigStore.loadConfig(_scheduleConfig, localStorage);
+
 var weekIndex = localStorage.getItem('weekIndex')
 if (weekIndex === null) localStorage.setItem('weekIndex', '0')
 weekIndex = Number(localStorage.getItem('weekIndex'))
