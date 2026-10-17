@@ -39,11 +39,18 @@
     }
 
     function loadState(storage) {
+        const weekIndex = readInteger(storage, KEYS.weekIndex, DEFAULTS.weekIndex);
+        const timeOffset = readInteger(storage, KEYS.timeOffset, DEFAULTS.timeOffset);
+        const dayOffset = readInteger(storage, KEYS.dayOffset, DEFAULTS.dayOffset);
+        const setDayOffsetLastDay = readInteger(storage, KEYS.setDayOffsetLastDay, DEFAULTS.setDayOffsetLastDay);
+
         return {
-            weekIndex: readInteger(storage, KEYS.weekIndex, DEFAULTS.weekIndex),
-            timeOffset: readInteger(storage, KEYS.timeOffset, DEFAULTS.timeOffset),
-            dayOffset: readInteger(storage, KEYS.dayOffset, DEFAULTS.dayOffset),
-            setDayOffsetLastDay: readInteger(storage, KEYS.setDayOffsetLastDay, DEFAULTS.setDayOffsetLastDay)
+            weekIndex: weekIndex >= 0 && weekIndex <= 3 ? weekIndex : DEFAULTS.weekIndex,
+            timeOffset,
+            dayOffset: dayOffset >= -1 && dayOffset <= 6 ? dayOffset : DEFAULTS.dayOffset,
+            setDayOffsetLastDay: setDayOffsetLastDay >= -1 && setDayOffsetLastDay <= 6
+                ? setDayOffsetLastDay
+                : DEFAULTS.setDayOffsetLastDay
         };
     }
 
