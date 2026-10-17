@@ -231,23 +231,32 @@
   });
 
   ipcRenderer.on('setWeekIndex', (e, arg) => {
-    weekIndex = arg
-    localStorage.setItem('weekIndex', weekIndex.toString())
+    try {
+      weekIndex = AppStateStore.setWeekIndex(localStorage, Number(arg))
+    } catch (error) {
+      console.error('Rejected week index:', error)
+    }
   })
 
   ipcRenderer.on('getWeekIndex', (e, arg) => {
-    let index = localStorage.getItem('weekIndex');
-    ipcRenderer.send('getWeekIndex', index === null ? 0 : Number(index))
+    const state = AppStateStore.loadState(localStorage)
+    weekIndex = state.weekIndex
+    ipcRenderer.send('getWeekIndex', weekIndex)
   })
 
   ipcRenderer.on('getTimeOffset', (e, arg) => {
-    let offset = localStorage.getItem('timeOffset');
-    ipcRenderer.send('getTimeOffset', offset === null ? 0 : Number(offset))
+    const state = AppStateStore.loadState(localStorage)
+    timeOffset = state.timeOffset
+    ipcRenderer.send('getTimeOffset', timeOffset)
   })
 
   ipcRenderer.on('setTimeOffset', (e, arg) => {
-    timeOffset = arg
-    localStorage.setItem('timeOffset', arg.toString())
+    const value = Number(arg)
+    if (!Number.isSafeInteger(value)) {
+      console.error('Rejected time offset:', arg)
+      return
+    }
+    timeOffset = AppStateStore.setTimeOffset(localStorage, value)
   })
 
   ipcRenderer.on('ClassCountdown', (e, arg) => {
@@ -275,14 +284,12 @@
   ipcRenderer.on('getDayOffset', (e, arg) => {
     if (arg.index == -1) return
     if (arg.index <= 6) {
-      localStorage.setItem('dayOffset', arg.index.toString())
-      localStorage.setItem('setDayOffsetLastDay', new Date().getDay().toString())
-      dayOffset = arg.index
-      setDayOffsetLastDay = new Date().getDay()
+      const state = AppStateStore.setDayOffset(localStorage, arg.index, new Date().getDay())
+      dayOffset = state.dayOffset
+      setDayOffsetLastDay = state.setDayOffsetLastDay
       return
     }
-    localStorage.setItem('dayOffset', '-1')
-    localStorage.setItem('setDayOffsetLastDay', '-1')
-    dayOffset = -1
-    setDayOffsetLastDay = -1
+    const state = AppStateStore.resetDayOffset(localStorage)
+    dayOffset = state.dayOffset
+    setDayOffsetLastDay = state.setDayOffsetLastDay
   })
