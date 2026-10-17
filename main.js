@@ -59,11 +59,12 @@ function createWindow() {
     });
 }
 
-if (!app.requestSingleInstanceLock({ key: 'classSchedule' })) {
-    app.quit();
-}
+const hasSingleInstanceLock = app.requestSingleInstanceLock({ key: 'classSchedule' });
 
-app.whenReady().then(() => {
+if (!hasSingleInstanceLock) {
+    app.quit();
+} else {
+    app.whenReady().then(() => {
     createWindow();
     Menu.setApplicationMenu(null);
 
@@ -73,13 +74,14 @@ app.whenReady().then(() => {
 });
 
 trayManager.registerWeekMenuHandler(ipcMain);
-registerIpcHandlers({
-    ipcMain,
-    dialog,
-    prompt,
-    getWindow,
-    getTrayMenu: trayManager.getTrayMenu,
-    getBasePath,
-    setAutoLaunch,
-    store
-});
+    registerIpcHandlers({
+        ipcMain,
+        dialog,
+        prompt,
+        getWindow,
+        getTrayMenu: trayManager.getTrayMenu,
+        getBasePath,
+        setAutoLaunch,
+        store
+    });
+}
