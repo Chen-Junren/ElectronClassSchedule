@@ -195,7 +195,6 @@
 
   ipcRenderer.on('getSelectedClassIndex', (e, arg) => {
     if (arg.index == -1) return
-    let text = arg.arg.options.buttons[arg.index]
     let classes = Object.keys(scheduleConfig.subject_name).sort();
     ipcRenderer.send('dialog', {
       reply: 'getSelectedChangingClass',
