@@ -26,7 +26,7 @@ function createAutoLaunchManager({ app, store }) {
         if (store.get('isAutoLaunch', true)) {
             createShortcut.create(shortcutPath, {
                 target: app.getPath('exe'),
-                workingDir: app.getPath('exe').split('\\\\').slice(0, -1).join('\\\\')
+                workingDir: app.getPath('exe').split('\\').slice(0, -1).join('\\')
             }, (error) => {
                 if (error) console.log(error);
             });
