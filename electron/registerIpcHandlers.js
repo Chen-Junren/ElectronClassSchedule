@@ -66,7 +66,11 @@ function registerIpcHandlers({
         const win = getWindow();
         if (!win || win.isDestroyed()) return;
 
-        win.setIgnoreMouseEvents(shouldIgnore, shouldIgnore ? { forward: true } : undefined);
+        if (shouldIgnore) {
+            win.setIgnoreMouseEvents(true, { forward: true });
+        } else {
+            win.setIgnoreMouseEvents(false);
+        }
     });
 
     ipcMain.on('dialog', (event, request) => {
