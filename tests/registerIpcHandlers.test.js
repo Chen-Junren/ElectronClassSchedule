@@ -81,7 +81,7 @@ test('dialog replies with the original request and selected index', async () => 
 
     assert.equal(replies.length, 1);
     assert.equal(replies[0][0], 'getSelectedClassIndex');
-    assert.deepEqual(replies[0][1], { arg: request, index: 0 });
+    assert.deepEqual(replies[0][1], { arg: { reply: request.reply, options: { ...request.options, cancelId: -1 } }, index: 0 });
     assert.equal(typeof dialog.showMessageBox, 'function');
 });
 
