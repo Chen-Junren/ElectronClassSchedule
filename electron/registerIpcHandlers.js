@@ -24,7 +24,11 @@ function normalizeDialogRequest(request) {
         title: options.title,
         message: options.message,
         buttons: options.buttons.slice(),
-        cancelId: Number.isInteger(options.cancelId) ? options.cancelId : -1
+        cancelId: Number.isInteger(options.cancelId)
+            && options.cancelId >= -1
+            && options.cancelId < options.buttons.length
+            ? options.cancelId
+            : -1
     };
 
     if (Number.isInteger(options.defaultId)
@@ -33,16 +37,23 @@ function normalizeDialogRequest(request) {
         normalizedOptions.defaultId = options.defaultId;
     }
 
-    return {
+    const normalizedRequest = {
         reply: request.reply,
-        options: normalizedOptions,
-        index: Number.isInteger(request.index) ? request.index : undefined,
-        classes: Array.isArray(request.classes)
-            && request.classes.length <= 32
-            && request.classes.every(item => typeof item === 'string' && item.length <= 100)
-            ? request.classes.slice()
-            : undefined
+        options: normalizedOptions
     };
+
+    if (request.reply === 'getSelectedChangingClass') {
+        if (!Number.isInteger(request.index) || request.index < 0 || request.index >= 32) return null;
+        if (!Array.isArray(request.classes)
+            || request.classes.length < 1
+            || request.classes.length > 32
+            || !request.classes.every(item => typeof item === 'string' && item.length <= 100)) return null;
+        if (request.classes.length !== normalizedOptions.buttons.length) return null;
+        normalizedRequest.index = request.index;
+        normalizedRequest.classes = request.classes.slice();
+    }
+
+    return normalizedRequest;
 }
 
 function registerIpcHandlers({
@@ -85,9 +96,14 @@ function registerIpcHandlers({
 
         dialog.showMessageBox(win, normalizedRequest.options).then((data) => {
             if (!event.sender || event.sender.isDestroyed()) return;
+            const responseIndex = Number.isInteger(data.response)
+                && data.response >= 0
+                && data.response < normalizedRequest.options.buttons.length
+                ? data.response
+                : -1;
             event.reply(normalizedRequest.reply, {
-                arg: request,
-                index: data.response
+                arg: normalizedRequest,
+                index: responseIndex
             });
         }).catch((error) => {
             console.error('[dialog] Failed to show message box:', error);
