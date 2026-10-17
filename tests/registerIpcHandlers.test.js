@@ -70,7 +70,10 @@ test('setIgnore safely ignores requests when the window is destroyed', () => {
 test('dialog replies with the original request and selected index', async () => {
     const { handlers, dialog } = createHarness();
     const replies = [];
-    const event = { reply: (...args) => replies.push(args) };
+    const event = {
+        sender: { isDestroyed: () => false },
+        reply: (...args) => replies.push(args)
+    };
     const request = { reply: 'chosen', options: { buttons: ['A', 'B'], defaultId: 0 } };
 
     handlers.get('dialog')(event, request);
@@ -115,5 +118,69 @@ test('getTimeOffset does not send after cancellation', async () => {
 
     handlers.get('getTimeOffset')({}, 5);
     await new Promise(resolve => setImmediate(resolve));
+    assert.deepEqual(sent, []);
+});
+
+
+test('dialog rejects arbitrary reply channels and malformed options', () => {
+    const { handlers } = createHarness();
+    let called = false;
+    const original = console.warn;
+    console.warn = () => {};
+    try {
+        handlers.get('dialog')({ sender: { isDestroyed: () => false }, reply() { called = true; } }, {
+            reply: 'untrusted-channel',
+            options: { title: 'Oops', message: 'Nope', buttons: ['OK'] }
+        });
+        handlers.get('dialog')({ sender: { isDestroyed: () => false }, reply() { called = true; } }, {
+            reply: 'getDayOffset',
+            options: { title: 'Bad', message: 'No buttons', buttons: 'not-an-array' }
+        });
+    } finally {
+        console.warn = original;
+    }
+    assert.equal(called, false);
+});
+
+test('setIgnore rejects non-boolean payloads', () => {
+    const { handlers, win } = createHarness();
+    handlers.get('setIgnore')({}, 'true');
+    assert.equal(win.ignoreArgs, undefined);
+});
+
+test('getTimeOffset rejects malformed input before opening the prompt', () => {
+    const { handlers, promptCalls } = createHarness();
+    const original = console.warn;
+    console.warn = () => {};
+    try {
+        handlers.get('getTimeOffset')({}, 'not-a-number');
+    } finally {
+        console.warn = original;
+    }
+    assert.equal(promptCalls.length, 0);
+});
+
+test('getTimeOffset rejects malformed prompt output', async () => {
+    const handlers = new Map();
+    const sent = [];
+    const ipcMain = { on(channel, handler) { handlers.set(channel, handler); } };
+    const original = console.warn;
+    console.warn = () => {};
+    try {
+        registerIpcHandlers({
+            ipcMain,
+            dialog: { showMessageBox: async () => ({ response: 0 }) },
+            prompt: async () => 'not-a-number',
+            getWindow: () => ({ isDestroyed: () => false, webContents: { send: (...args) => sent.push(args) } }),
+            getTrayMenu: () => ({}),
+            getBasePath: () => './',
+            setAutoLaunch() {},
+            store: { get() { return false; }, set() {} }
+        });
+        handlers.get('getTimeOffset')({}, 5);
+        await new Promise(resolve => setImmediate(resolve));
+    } finally {
+        console.warn = original;
+    }
     assert.deepEqual(sent, []);
 });
