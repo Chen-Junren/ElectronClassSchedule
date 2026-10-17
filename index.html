@@ -35,7 +35,7 @@
 
 </body>
 <script>
-  const { ipcRenderer } = require('electron');
+  const ipcRenderer = window.electronAPI;
   let scheduleData = getScheduleData();
   let globalContainer = document.getElementById('globalContainer')
   let classContainer = document.getElementById('classContainer')
