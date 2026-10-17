@@ -1,6 +1,6 @@
 const { Menu, Tray, shell } = require('electron');
 
-function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch }) {
+function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, Menu: menuApi = Menu, Tray: trayApi = Tray, shell: shellApi = shell }) {
     let tray;
     let form;
 
@@ -14,7 +14,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
             if (!win || win.isDestroyed()) return;
 
             if (!tray) {
-                tray = new Tray(getBasePath() + 'image/icon.png');
+                tray = new trayApi(getBasePath() + 'image/icon.png');
                 tray.setToolTip('电子课表 - by lsl');
                 const showMenu = () => {
                     if (form) tray.popUpContextMenu(form);
@@ -54,7 +54,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 {
                     icon: getBasePath() + 'image/github.png',
                     label: '源码仓库',
-                    click: () => shell.openExternal('https://github.com/EnderWolf006/ElectronClassSchedule')
+                    click: () => shellApi.openExternal('https://github.com/EnderWolf006/ElectronClassSchedule')
                 },
                 { type: 'separator' },
                 {
@@ -125,7 +125,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 template[selectedWeek].checked = true;
             }
 
-            form = Menu.buildFromTemplate(template);
+            form = menuApi.buildFromTemplate(template);
             tray.setContextMenu(form);
 
             sendToWindow('ClassCountdown', store.get('isDuringClassCountdown', true));
