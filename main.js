@@ -11,10 +11,8 @@ const { createTrayManager } = require('./electron/registerTray');
 const store = new Store();
 let win;
 
-const basePath = __dirname + path.sep;
+const getBasePath = () => __dirname + path.sep;
 const getWindow = () => win;
-const getBasePath = () => basePath;
-
 const { setAutoLaunch } = createAutoLaunchManager({ app, store });
 const trayManager = createTrayManager({
     app,
@@ -54,8 +52,9 @@ function createWindow() {
     }
 
     win.webContents.on('did-finish-load', () => {
-        if (!win || win.isDestroyed()) return;
-        win.webContents.send('getWeekIndex');
+        const currentWindow = getWindow();
+        if (!currentWindow || currentWindow.isDestroyed()) return;
+        currentWindow.webContents.send('getWeekIndex');
     });
 }
 
@@ -64,16 +63,7 @@ const hasSingleInstanceLock = app.requestSingleInstanceLock({ key: 'classSchedul
 if (!hasSingleInstanceLock) {
     app.quit();
 } else {
-    app.whenReady().then(() => {
-    createWindow();
-    Menu.setApplicationMenu(null);
-
-    const handle = win.getNativeWindowHandle();
-    DisableMinimize(handle);
-    setAutoLaunch();
-});
-
-trayManager.registerWeekMenuHandler(ipcMain);
+    trayManager.registerWeekMenuHandler(ipcMain);
     registerIpcHandlers({
         ipcMain,
         dialog,
@@ -83,5 +73,14 @@ trayManager.registerWeekMenuHandler(ipcMain);
         getBasePath,
         setAutoLaunch,
         store
+    });
+
+    app.whenReady().then(() => {
+        createWindow();
+        Menu.setApplicationMenu(null);
+
+        const handle = win.getNativeWindowHandle();
+        DisableMinimize(handle);
+        setAutoLaunch();
     });
 }
