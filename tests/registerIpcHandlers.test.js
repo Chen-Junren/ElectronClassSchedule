@@ -184,3 +184,40 @@ test('getTimeOffset rejects malformed prompt output', async () => {
     }
     assert.deepEqual(sent, []);
 });
+
+
+test('dialog rejects inconsistent class-change metadata', () => {
+    const { handlers } = createHarness();
+    const original = console.warn;
+    console.warn = () => {};
+    let replied = false;
+    try {
+        handlers.get('dialog')({
+            sender: { isDestroyed: () => false },
+            reply() { replied = true; }
+        }, {
+            reply: 'getSelectedChangingClass',
+            index: 0,
+            classes: ['语', '数'],
+            options: { title: 'Change', message: 'Pick', buttons: ['语'] }
+        });
+    } finally {
+        console.warn = original;
+    }
+    assert.equal(replied, false);
+});
+
+test('dialog normalizes out-of-range response indices to cancellation', async () => {
+    const { handlers } = createHarness();
+    const replies = [];
+    handlers.get('dialog')({
+        sender: { isDestroyed: () => false },
+        reply: (...args) => replies.push(args)
+    }, {
+        reply: 'getDayOffset',
+        options: { title: 'Day', message: 'Choose a day', buttons: ['Sunday'] }
+    });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(replies.length, 1);
+    assert.equal(replies[0][1].index, -1);
+});
