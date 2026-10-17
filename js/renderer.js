@@ -118,7 +118,8 @@
 
   function setSidebar() {
     let date = getCurrentEditedDate()
-    let week = date.getDay()
+    // Display the day whose timetable is active, including a manual day override.
+    let week = getCurrentEditedDay(date)
     let data = scheduleConfig.daily_class[week]
     weekCH.innerText = data.Chinese
     weekEN.innerText = data.English
