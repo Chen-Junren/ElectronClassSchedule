@@ -9,6 +9,7 @@
   <script type="text/javascript" src="js/jquery.min.js"></script>
   <script type="text/javascript" src="js/scheduleConfig.js"></script>
   <script type="text/javascript" src="js/scheduleEngine.js"></script>
+  <script type="text/javascript" src="js/scheduleConfigStore.js"></script>
   <script type="text/javascript" src="js/index.js"></script>
   <link rel="stylesheet" type="text/css" href="css/style.css">
 </head>
@@ -253,6 +254,7 @@
     const date = getCurrentEditedDate();
     const dayOfWeek = getCurrentEditedDay(date);
     scheduleConfig.daily_class[dayOfWeek].classList[index] = selectedClass;
+    ScheduleConfigStore.saveClassOverride(localStorage, dayOfWeek, index, selectedClass, _scheduleConfig);
   })
 
   ipcRenderer.on('openSettingDialog', (e, arg) => {
@@ -266,7 +268,6 @@
   });
 
   ipcRenderer.on('setWeekIndex', (e, arg) => {
-    scheduleConfig = JSON.parse(JSON.stringify(_scheduleConfig))
     weekIndex = arg
     localStorage.setItem('weekIndex', weekIndex.toString())
   })
