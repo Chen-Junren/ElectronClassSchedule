@@ -104,6 +104,7 @@ async function getWeatherSnapshot(settings, options = {}) {
         nextHour: nextHour ? {
             temp: typeof nextHour.temp === 'string' ? nextHour.temp : null,
             text: typeof nextHour.text === 'string' ? nextHour.text : null,
+            icon: typeof nextHour.icon === 'string' ? nextHour.icon : null,
             fxTime: typeof nextHour.fxTime === 'string' ? nextHour.fxTime : null
         } : null,
         fetchedAt: new Date().toISOString()
