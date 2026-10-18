@@ -11,15 +11,32 @@ const { loadWeatherSettings, saveWeatherSettings } = require('./electron/weather
 const { getWeatherSnapshot } = require('./electron/qweatherClient');
 const { loadDateOverrides, saveDateOverrides } = require('./electron/dateOverrideStore');
 const { loadAppearanceSettings, saveAppearanceSettings } = require('./electron/appearanceSettingsStore');
+const { createLogger } = require('./electron/logger');
 
 const store = new Store();
+const logger = createLogger({ filePath: path.join(app.getPath('userData'), 'logs', 'app.log') });
 let win;
+
+logger.info('app.start', {
+    version: app.getVersion(),
+    platform: process.platform,
+    architecture: process.arch,
+    packaged: app.isPackaged
+});
+process.on('uncaughtException', (error) => {
+    logger.error('process.uncaughtException', error);
+    app.quit();
+});
+process.on('unhandledRejection', (reason) => {
+    logger.error('process.unhandledRejection', reason instanceof Error ? reason : { reason });
+});
 let settingsWindow = null;
 
 const getBasePath = () => __dirname + path.sep;
 const getWindow = () => win;
 
 function openSettingsWindow() {
+    logger.info('ui.open_settings_window');
     if (settingsWindow && !settingsWindow.isDestroyed()) {
         settingsWindow.show();
         settingsWindow.focus();
@@ -42,7 +59,15 @@ function openSettingsWindow() {
         }
     });
 
-    settingsWindow.loadFile(path.join(__dirname, 'settings.html'));
+    settingsWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+        logger.error('window.settings.load_failed', { errorCode, errorDescription, url: validatedURL });
+    });
+    settingsWindow.webContents.on('render-process-gone', (_event, details) => {
+        logger.error('window.settings.renderer_gone', details);
+    });
+    settingsWindow.loadFile(path.join(__dirname, 'settings.html')).catch(error => {
+        logger.error('window.settings.load_error', error);
+    });
     settingsWindow.once('ready-to-show', () => {
         if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.show();
     });
@@ -53,6 +78,7 @@ function openSettingsWindow() {
 const { setAutoLaunch } = createAutoLaunchManager({ app, store });
 const trayManager = createTrayManager({
     app,
+    logger,
     dialog,
     getWindow,
     store,
@@ -83,7 +109,15 @@ function createWindow() {
         }
     });
 
-    win.loadFile(path.join(__dirname, 'index.html'));
+    win.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+        logger.error('window.main.load_failed', { errorCode, errorDescription, url: validatedURL });
+    });
+    win.webContents.on('render-process-gone', (_event, details) => {
+        logger.error('window.main.renderer_gone', details);
+    });
+    win.loadFile(path.join(__dirname, 'index.html')).catch(error => {
+        logger.error('window.main.load_error', error);
+    });
 
     if (store.get('isWindowAlwaysOnTop', true)) {
         win.setAlwaysOnTop(true, 'screen-saver', 9999999999999);
@@ -102,6 +136,7 @@ if (!hasSingleInstanceLock) {
     app.quit();
 } else {
     ipcMain.handle('setScheduleDay', (_event, day) => {
+        logger.info('user.schedule_day_change_requested', { day });
         if (!Number.isInteger(day) || day < 0 || day > 7) {
             throw new TypeError('Invalid schedule day');
         }
@@ -111,35 +146,82 @@ if (!hasSingleInstanceLock) {
         win.webContents.send('applyScheduleDay', day);
         return { ok: true };
     });
-    ipcMain.handle('getDateOverrides', () => loadDateOverrides(store));
+    ipcMain.handle('getDateOverrides', () => {
+        const overrides = loadDateOverrides(store);
+        logger.debug('settings.date_overrides.loaded', { count: overrides.length });
+        return overrides;
+    });
     ipcMain.handle('saveDateOverrides', (_event, value) => {
+        logger.info('user.date_overrides.save_requested', { count: Array.isArray(value) ? value.length : null, entries: value });
         const overrides = saveDateOverrides(store, value);
+        logger.info('settings.date_overrides.saved', { count: overrides.length, entries: overrides });
         if (win && !win.isDestroyed()) win.webContents.send('dateOverridesChanged', overrides);
         return overrides;
     });
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
-    ipcMain.handle('getAppearanceSettings', () => loadAppearanceSettings(store));
+    ipcMain.handle('getAppearanceSettings', () => {
+        const settings = loadAppearanceSettings(store);
+        logger.debug('settings.appearance.loaded', settings);
+        return settings;
+    });
     ipcMain.handle('saveAppearanceSettings', (_event, value) => {
+        logger.info('user.appearance.save_requested', value);
         const saved = saveAppearanceSettings(store, value);
+        logger.info('settings.appearance.saved', saved);
         if (win && !win.isDestroyed()) win.webContents.send('appearanceSettingsChanged', saved);
         if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.webContents.send('appearanceSettingsChanged', saved);
         return saved;
     });
-    ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
+    ipcMain.handle('getWeatherSettings', () => {
+        const settings = loadWeatherSettings(store);
+        logger.debug('settings.weather.loaded', settings);
+        return settings;
+    });
     ipcMain.handle('saveWeatherSettings', (_event, value) => {
+        logger.info('user.weather_settings.save_requested', value);
         const saved = saveWeatherSettings(store, value);
+        logger.info('settings.weather.saved', saved);
         if (win && !win.isDestroyed()) win.webContents.send('weatherSettingsChanged');
         return saved;
     });
     ipcMain.handle('getWeatherSnapshot', async () => {
         const settings = loadWeatherSettings(store);
-        return getWeatherSnapshot(settings, {
-            saveSettings: (value) => saveWeatherSettings(store, value)
+        logger.info('user.weather_refresh_requested', {
+            enabled: settings.enabled,
+            apiHost: settings.apiHost,
+            geoApiHost: settings.geoApiHost,
+            region: settings.region ? {
+                label: settings.region.label,
+                province: settings.region.province,
+                city: settings.region.city,
+                district: settings.region.district,
+                adminCode: settings.region.adminCode,
+                qweatherLocationId: settings.region.qweatherLocationId
+            } : null
         });
+        try {
+            const snapshot = await getWeatherSnapshot(settings, {
+                logger,
+                saveSettings: (value) => saveWeatherSettings(store, value)
+            });
+            logger.info('user.weather_refresh_completed', {
+                enabled: snapshot && snapshot.enabled,
+                regionLabel: snapshot && snapshot.regionLabel,
+                locationId: snapshot && snapshot.locationId,
+                now: snapshot && snapshot.now,
+                nextHour: snapshot && snapshot.nextHour,
+                fetchedAt: snapshot && snapshot.fetchedAt
+            });
+            return snapshot;
+        } catch (error) {
+            logger.error('user.weather_refresh_failed', error);
+            throw error;
+        }
     });
     trayManager.registerWeekMenuHandler(ipcMain);
     registerIpcHandlers({
         ipcMain,
+        logger,
         dialog,
         prompt,
         getWindow,
@@ -150,11 +232,17 @@ if (!hasSingleInstanceLock) {
     });
 
     app.whenReady().then(() => {
+        logger.info('app.ready');
         createWindow();
         Menu.setApplicationMenu(null);
 
         const handle = win.getNativeWindowHandle();
         DisableMinimize(handle);
         setAutoLaunch();
+        logger.info('app.initialization_completed');
+    }).catch(error => {
+        logger.error('app.initialization_failed', error);
     });
+    app.on('before-quit', () => logger.info('app.before_quit'));
+    app.on('will-quit', () => logger.info('app.will_quit'));
 }
