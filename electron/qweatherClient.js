@@ -105,7 +105,7 @@ function validCoordinate(value, min, max) {
 
 async function resolveCoordinates(settings, options, logger) {
     const region = settings.region;
-    const fetchImpl = options.fetchImpl;
+    const fetchImpl = options.fetchImpl || globalThis.fetch;
     const cachedLat = region.latitude;
     const cachedLon = region.longitude;
     if (validCoordinate(cachedLat, -90, 90) && validCoordinate(cachedLon, -180, 180)) {
