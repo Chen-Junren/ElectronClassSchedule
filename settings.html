@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>电子课表设置</title>
+  <link rel="stylesheet" href="css/settings.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand-mark">课</div>
+      <div>
+        <h1>设置中心</h1>
+        <p>电子课表 · 个性化配置</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="nav-list" aria-label="设置分类">
+        <button class="nav-item active" type="button" data-section="weather">地区与天气</button>
+        <button class="nav-item" type="button" data-section="schedule">课表与科目</button>
+        <button class="nav-item" type="button" data-section="calendar">学期与调课</button>
+        <button class="nav-item" type="button" data-section="appearance">外观与主题</button>
+        <button class="nav-item" type="button" data-section="exam">考试模式</button>
+      </nav>
+
+      <section class="content">
+        <section class="settings-section" data-panel="weather">
+          <div class="section-heading">
+            <div>
+              <h2>地区与天气</h2>
+              <p>手动选择到区县级地区。行政区划代码与天气服务 ID 分开管理。</p>
+            </div>
+          </div>
+
+          <div class="panel">
+            <label class="field-label" for="regionSearch">搜索中国地区</label>
+            <input id="regionSearch" type="search" autocomplete="off" placeholder="输入省、市、区县名称或 6 位地区代码">
+            <p class="hint">支持多个关键词，例如“广东 深圳 南山”；同名地区会显示完整路径。</p>
+            <div id="regionResults" class="region-results" role="listbox" aria-label="地区搜索结果">
+              <p class="empty-state">正在载入地区数据…</p>
+            </div>
+            <div class="selected-region">
+              <span class="selected-label">当前选择</span>
+              <strong id="selectedRegion">尚未选择地区</strong>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title-row">
+              <div>
+                <h3>天气服务（QWeather）</h3>
+                <p class="hint">密钥只保存在本机设置中，不会写入仓库。</p>
+              </div>
+              <label class="toggle">
+                <input id="weatherEnabled" type="checkbox">
+                <span>启用天气面板</span>
+              </label>
+            </div>
+            <label class="field-label" for="qweatherHost">API Host</label>
+            <input id="qweatherHost" type="text" autocomplete="off" value="api.qweather.com" placeholder="api.qweather.com">
+            <p class="hint">填写你的 QWeather 控制台提供的 API Host，不要填写协议或路径。</p>
+            <label class="field-label" for="qweatherKey">API Key</label>
+            <input id="qweatherKey" type="password" autocomplete="new-password" placeholder="粘贴你的 QWeather API Key">
+          </div>
+
+          <div class="notice" id="statusMessage" role="status" aria-live="polite"></div>
+          <div class="actions">
+            <button id="saveSettings" class="primary-button" type="button">保存设置</button>
+            <button id="resetSearch" class="secondary-button" type="button">清空搜索</button>
+          </div>
+        </section>
+
+        <section class="settings-section hidden" data-panel="schedule">
+          <div class="section-heading"><div><h2>课表与科目</h2><p>统一课表编辑器正在规划中。</p></div></div>
+          <div class="panel future-panel"><h3>下一步</h3><p>在设置窗口中编辑每日课程、课程时间、科目名称和单双周安排，同时保留现有顶部悬浮条。</p></div>
+        </section>
+        <section class="settings-section hidden" data-panel="calendar">
+          <div class="section-heading"><div><h2>学期与调课</h2><p>管理学期周数、节假日和补课日。</p></div></div>
+          <div class="panel future-panel"><h3>下一步</h3><p>支持按日期覆盖当天课表，配置放假、调休、补课及临时换课，并让手动调整优先于常规周历。</p></div>
+        </section>
+        <section class="settings-section hidden" data-panel="appearance">
+          <div class="section-heading"><div><h2>外观与主题</h2><p>让悬浮课表更贴合你的桌面。</p></div></div>
+          <div class="panel future-panel"><h3>下一步</h3><p>后续加入颜色、透明度、间距和主题预设，并考虑按时间自动切换。</p></div>
+        </section>
+        <section class="settings-section hidden" data-panel="exam">
+          <div class="section-heading"><div><h2>考试模式</h2><p>简洁、专注的考试计时面板。</p></div></div>
+          <div class="panel future-panel"><h3>下一步</h3><p>支持考试科目、开始时间、总页数、开始/暂停/结束控制，以及可选的结束提醒音。</p></div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <script src="js/chinaRegionSearch.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>
