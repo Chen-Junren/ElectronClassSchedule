@@ -72,7 +72,7 @@ function registerIpcHandlers({
     };
 
     ipcMain.on('appLogEvent', (_event, event, details) => {
-        if (typeof event !== 'string' || !/^user\\.[a-z0-9_.-]{1,100}$/i.test(event)) {
+        if (typeof event !== 'string' || !/^user\.[a-z0-9_.-]{1,100}$/i.test(event)) {
             writeLog('warn', 'renderer.log_event_rejected', { reason: 'Invalid event name' });
             return;
         }
