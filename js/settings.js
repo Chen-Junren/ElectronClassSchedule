@@ -233,7 +233,7 @@
 
     const nextSettings = {
       enabled: weatherEnabled.checked,
-      apiHost: host || 'api.qweather.com',
+      apiHost: host,
       apiKey: qweatherKey.value.trim(),
       region: selectedRegion ? {
         adminCode: selectedRegion.adminCode,
