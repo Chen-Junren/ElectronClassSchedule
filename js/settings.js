@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const STORAGE_KEY = 'classSchedule.weatherSettings';
   const searchInput = document.getElementById('regionSearch');
   const resultsElement = document.getElementById('regionResults');
   const selectedElement = document.getElementById('selectedRegion');
@@ -11,16 +10,8 @@
   const statusMessage = document.getElementById('statusMessage');
   let regions = [];
   let selectedRegion = null;
-  let savedSettings = loadSettings();
+  let savedSettings = {};
 
-  function loadSettings() {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
-    } catch (_error) {
-      return {};
-    }
-  }
 
   function showStatus(message, isSuccess) {
     statusMessage.textContent = message;
@@ -70,6 +61,7 @@
 
   async function init() {
     try {
+      savedSettings = await window.electronAPI.getWeatherSettings();
       const data = await window.electronAPI.getChinaDistrictCodes();
       regions = window.ChinaRegionSearch.buildDistrictIndex(data);
       if (savedSettings.region && typeof savedSettings.region.adminCode === 'string') {
@@ -94,7 +86,7 @@
     showStatus('', true);
   });
 
-  document.getElementById('saveSettings').addEventListener('click', () => {
+  document.getElementById('saveSettings').addEventListener('click', async () => {
     const host = qweatherHost.value.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
     if (host && !/^[a-z0-9.-]+(?::\d+)?$/i.test(host)) {
       showStatus('API Host 格式不正确，请只填写域名。', false);
@@ -123,9 +115,8 @@
       } : null
     };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextSettings));
-      savedSettings = nextSettings;
-      showStatus('设置已保存在本机。天气面板会在天气模块接入后读取这些配置。', true);
+      savedSettings = await window.electronAPI.saveWeatherSettings(nextSettings);
+      showStatus('设置已安全保存到本机。天气面板会在天气模块接入后读取这些配置。', true);
     } catch (error) {
       showStatus('保存失败：' + (error.message || '本地存储不可用'), false);
     }
