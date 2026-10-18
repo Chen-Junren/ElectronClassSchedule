@@ -220,12 +220,26 @@
     if (descriptionElement) descriptionElement.style.display = 'none';
   }
 
+  function showWeatherUnavailable(message = '未获取到天气信息') {
+    if (!weatherPanel) return;
+    weatherPanel.style.display = 'block';
+    weatherRegion.innerText = '天气';
+    weatherCurrent.innerText = '--°';
+    weatherDescription.innerText = message;
+    weatherNextHour.innerText = message;
+    setWeatherIcon(weatherIcon, null, '');
+    setWeatherIcon(weatherNextIcon, null, '');
+    positionWeatherPanel();
+  }
+
   async function refreshWeather() {
     if (!weatherPanel) return;
     try {
       const snapshot = await ipcRenderer.getWeatherSnapshot();
+      // Keep the panel visible even before weather settings are configured or when fetching is disabled.
+      // This also makes the unavailable-data fallback visible on a clean installation.
       if (!snapshot || snapshot.enabled !== true) {
-        weatherPanel.style.display = 'none';
+        showWeatherUnavailable();
         return;
       }
       weatherPanel.style.display = 'block';
@@ -246,15 +260,8 @@
       }
       positionWeatherPanel();
     } catch (error) {
-      weatherPanel.style.display = 'block';
-      weatherRegion.innerText = '天气';
-      weatherCurrent.innerText = '--°';
-      weatherDescription.innerText = '未获取到天气信息';
-      weatherNextHour.innerText = '未获取到天气信息';
-      setWeatherIcon(weatherIcon, null, '');
-      setWeatherIcon(weatherNextIcon, null, '');
-      positionWeatherPanel();
-      console.warn('[weather] Failed to refresh weather data');
+      showWeatherUnavailable();
+      console.warn('[weather] Failed to refresh weather data:', error && (error.message || error));
     }
   }
 
