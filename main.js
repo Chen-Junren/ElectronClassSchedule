@@ -10,6 +10,7 @@ const { createTrayManager } = require('./electron/registerTray');
 const { loadWeatherSettings, saveWeatherSettings } = require('./electron/weatherSettingsStore');
 const { getWeatherSnapshot } = require('./electron/qweatherClient');
 const { loadDateOverrides, saveDateOverrides } = require('./electron/dateOverrideStore');
+const { loadAppearanceSettings, saveAppearanceSettings } = require('./electron/appearanceSettingsStore');
 
 const store = new Store();
 let win;
@@ -117,6 +118,13 @@ if (!hasSingleInstanceLock) {
         return overrides;
     });
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
+    ipcMain.handle('getAppearanceSettings', () => loadAppearanceSettings(store));
+    ipcMain.handle('saveAppearanceSettings', (_event, value) => {
+        const saved = saveAppearanceSettings(store, value);
+        if (win && !win.isDestroyed()) win.webContents.send('appearanceSettingsChanged', saved);
+        if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.webContents.send('appearanceSettingsChanged', saved);
+        return saved;
+    });
     ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
     ipcMain.handle('saveWeatherSettings', (_event, value) => {
         const saved = saveWeatherSettings(store, value);
