@@ -35,11 +35,17 @@
   <div class="miniCountdown" id="miniCountdown">00:00</div>
   <section class="weatherPanel" id="weatherPanel" aria-live="polite" aria-label="天气信息">
     <div class="weatherRegion" id="weatherRegion">天气</div>
-    <div class="weatherCurrent" id="weatherCurrent">--°</div>
+    <div class="weatherCurrentRow">
+      <img class="weatherIcon" id="weatherIcon" alt="" aria-hidden="true">
+      <div class="weatherCurrent" id="weatherCurrent">--°</div>
+    </div>
     <div class="weatherDescription" id="weatherDescription">等待天气数据</div>
     <div class="weatherDivider"></div>
     <div class="weatherNextTitle">未来一小时</div>
-    <div class="weatherNextHour" id="weatherNextHour">--</div>
+    <div class="weatherNextRow">
+      <img class="weatherNextIcon" id="weatherNextIcon" alt="" aria-hidden="true">
+      <div class="weatherNextHour" id="weatherNextHour">--</div>
+    </div>
   </section>
 
 </body>
