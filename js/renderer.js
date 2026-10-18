@@ -42,6 +42,7 @@
     if (!settings || typeof settings !== 'object') return;
     const colorVariables = {
       classText: '--class-text-color',
+      pastClassText: '--past-class-text-color',
       highlightText: '--highlight-text-color',
       countdownClassText: '--countdown-class-text-color',
       countdownText: '--countdown-text-color',
