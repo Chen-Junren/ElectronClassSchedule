@@ -21,7 +21,8 @@ const receiveChannels = new Set([
     'setDayOffset',
     'getDayOffset',
     'weatherSettingsChanged',
-    'dateOverridesChanged'
+    'dateOverridesChanged',
+    'appearanceSettingsChanged'
 ]);
 
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -33,6 +34,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     getChinaDistrictCodes() {
         return ipcRenderer.invoke('getChinaDistrictCodes');
+    },
+    getAppearanceSettings() {
+        return ipcRenderer.invoke('getAppearanceSettings');
+    },
+    saveAppearanceSettings(settings) {
+        return ipcRenderer.invoke('saveAppearanceSettings', settings);
     },
     getWeatherSettings() {
         return ipcRenderer.invoke('getWeatherSettings');
