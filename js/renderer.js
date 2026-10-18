@@ -30,7 +30,8 @@
     },
     scheduleArray: [null, null, null],
     timetable: null,
-    divider: [null, null]
+    divider: [null, null],
+    noClasses: false
   }
 
   function setScheduleClass() {
@@ -123,11 +124,17 @@
 
   function setSidebar() {
     let date = getCurrentEditedDate()
-    // Display the day whose timetable is active, including a manual day override.
-    let week = getCurrentEditedDay(date)
-    let data = scheduleConfig.daily_class[week]
-    weekCH.innerText = data.Chinese
-    weekEN.innerText = data.English
+    const dateOverride = AppStateStore.findDateOverride(date, dateOverrides)
+    if (dateOverride && dateOverride.type === 'holiday') {
+      weekCH.innerText = '放假'
+      weekEN.innerText = 'Holiday'
+    } else {
+      // Display the day whose timetable is active, including manual and date-specific overrides.
+      let week = getCurrentEditedDay(date)
+      let data = scheduleConfig.daily_class[week]
+      weekCH.innerText = data.Chinese
+      weekEN.innerText = data.English
+    }
     if (scheduleConfig.countdown_target === 'hidden') {
       rightSidebar.style.display = 'none'
     } else {
@@ -185,18 +192,29 @@
 
   function tick(reset = false) {
     scheduleData = getScheduleData();
-    setCountdownerContent()
-    if (JSON.stringify(scheduleData.scheduleArray) != JSON.stringify(lastScheduleData.scheduleArray) ||
+    const scheduleChanged = JSON.stringify(scheduleData.scheduleArray) != JSON.stringify(lastScheduleData.scheduleArray) ||
       scheduleData.currentHighlight.index != lastScheduleData.currentHighlight.index ||
       scheduleData.currentHighlight.fullName != lastScheduleData.currentHighlight.fullName ||
-      scheduleData.currentHighlight.type != lastScheduleData.currentHighlight.type || reset) {
-      setScheduleClass()
-      setCountdownerPosition()
-      setSidebar()
-      setBackgroundDisplay()
+      scheduleData.currentHighlight.type != lastScheduleData.currentHighlight.type ||
+      scheduleData.noClasses !== lastScheduleData.noClasses || reset;
+
+    if (scheduleData.noClasses) {
+      classContainer.innerHTML = '<div class="class holiday">今日无课</div>';
+      countdownContainer.style.display = 'none';
+      miniCountdown.style.display = 'none';
+      setSidebar();
+      setBackgroundDisplay();
+    } else {
+      setCountdownerContent();
+      if (scheduleChanged) {
+        setScheduleClass();
+        setCountdownerPosition();
+        setSidebar();
+        setBackgroundDisplay();
+      }
     }
-    positionWeatherPanel()
-    lastScheduleData = $.extend(true, {}, scheduleData)
+    positionWeatherPanel();
+    lastScheduleData = $.extend(true, {}, scheduleData);
   }
 
 
@@ -356,6 +374,14 @@
   })
 
 
+  ipcRenderer.on('dateOverridesChanged', (_event, overrides) => {
+    dateOverrides = Array.isArray(overrides) ? overrides : [];
+    tick(true);
+  })
+  ipcRenderer.getDateOverrides().then(overrides => {
+    dateOverrides = Array.isArray(overrides) ? overrides : [];
+    tick(true);
+  }).catch(error => console.warn('[schedule] Failed to load date overrides:', error))
   ipcRenderer.on('weatherSettingsChanged', () => refreshWeather())
   window.addEventListener('resize', positionWeatherPanel)
   refreshWeather()
