@@ -8,6 +8,7 @@ const { createAutoLaunchManager } = require('./electron/autoLaunch');
 const { registerIpcHandlers } = require('./electron/registerIpcHandlers');
 const { createTrayManager } = require('./electron/registerTray');
 const { loadWeatherSettings, saveWeatherSettings } = require('./electron/weatherSettingsStore');
+const { getWeatherSnapshot } = require('./electron/qweatherClient');
 
 const store = new Store();
 let win;
@@ -101,6 +102,12 @@ if (!hasSingleInstanceLock) {
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
     ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
     ipcMain.handle('saveWeatherSettings', (_event, value) => saveWeatherSettings(store, value));
+    ipcMain.handle('getWeatherSnapshot', async () => {
+        const settings = loadWeatherSettings(store);
+        return getWeatherSnapshot(settings, {
+            saveSettings: (value) => saveWeatherSettings(store, value)
+        });
+    });
     trayManager.registerWeekMenuHandler(ipcMain);
     registerIpcHandlers({
         ipcMain,
