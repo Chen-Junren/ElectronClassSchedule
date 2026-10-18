@@ -9,6 +9,7 @@ const { registerIpcHandlers } = require('./electron/registerIpcHandlers');
 const { createTrayManager } = require('./electron/registerTray');
 const { loadWeatherSettings, saveWeatherSettings } = require('./electron/weatherSettingsStore');
 const { getWeatherSnapshot } = require('./electron/qweatherClient');
+const { loadDateOverrides, saveDateOverrides } = require('./electron/dateOverrideStore');
 
 const store = new Store();
 let win;
@@ -108,6 +109,12 @@ if (!hasSingleInstanceLock) {
         }
         win.webContents.send('applyScheduleDay', day);
         return { ok: true };
+    });
+    ipcMain.handle('getDateOverrides', () => loadDateOverrides(store));
+    ipcMain.handle('saveDateOverrides', (_event, value) => {
+        const overrides = saveDateOverrides(store, value);
+        if (win && !win.isDestroyed()) win.webContents.send('dateOverridesChanged', overrides);
+        return overrides;
     });
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
     ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
