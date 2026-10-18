@@ -202,7 +202,7 @@
 
   function setWeatherIcon(iconElement, code, description) {
     if (!iconElement) return;
-    const normalizedCode = typeof code === 'string' && /^\\d{3}$/.test(code) ? code : '';
+    const normalizedCode = typeof code === 'string' && /^\d{3}$/.test(code) ? code : '';
     const descriptionElement = iconElement.id === 'weatherIcon' ? weatherDescription : null;
     if (!normalizedCode || !weatherIconsAvailable) {
       iconElement.className = iconElement.id === 'weatherIcon' ? 'weatherIcon' : 'weatherNextIcon';
