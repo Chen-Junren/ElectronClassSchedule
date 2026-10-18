@@ -88,6 +88,7 @@ input + .hint { margin-top: 7px; margin-bottom: 16px; }
 .appearance-preview { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; margin: 12px 0; padding: 18px 20px; border-radius: 12px; background: rgba(0,0,0,.78); color: var(--preview-class-text, #fff); }
 .preview-week { color: var(--preview-left-text, #00eeff); font-size: 12px; }
 .preview-course { font-size: 15px; color: var(--preview-class-text, #fff); }
+.preview-past { color: var(--preview-past-class-text, #a6a6a6); font-size: 13px; }
 .preview-current { color: var(--preview-highlight-text, #00ff0a); font-size: 13px; font-weight: 700; }
 .preview-countdown-class { color: var(--preview-countdown-class-text, #00ff0a); font-weight: 700; }
 .preview-countdown { color: var(--preview-countdown-text, #fff); font-family: monospace; }
