@@ -98,6 +98,7 @@ function chooseLocation(locations, region) {
 }
 
 function validCoordinate(value, min, max) {
+    if (value === null || value === undefined || value === '') return false;
     const number = Number(value);
     return Number.isFinite(number) && number >= min && number <= max;
 }
