@@ -1,3 +1,5 @@
+const path = require('path');
+
 function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, openSettingsWindow, logger, Menu: menuApi, Tray: trayApi, shell: shellApi }) {
     const writeLog = (level, event, details) => {
         if (logger && typeof logger[level] === 'function') logger[level](event, details);
@@ -64,6 +66,28 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     click: () => {
                         writeLog('info', 'user.time_offset_menu_selected');
                         sendToWindow('getTimeOffset');
+                    }
+                },
+                {
+                    label: '打开日志文件夹',
+                    click: async () => {
+                        const logFilePath = logger && logger.filePath;
+                        if (!logFilePath) {
+                            writeLog('warn', 'user.open_logs_folder_failed', { reason: 'Logger file path is unavailable' });
+                            return;
+                        }
+                        const logDirectory = path.dirname(logFilePath);
+                        writeLog('info', 'user.open_logs_folder_requested', { logDirectory });
+                        try {
+                            const errorMessage = await shellApi.openPath(logDirectory);
+                            if (errorMessage) {
+                                writeLog('error', 'user.open_logs_folder_failed', { logDirectory, errorMessage });
+                            } else {
+                                writeLog('info', 'user.open_logs_folder_succeeded', { logDirectory });
+                            }
+                        } catch (error) {
+                            writeLog('error', 'user.open_logs_folder_failed', { logDirectory, error });
+                        }
                     }
                 },
                 { type: 'separator' },
