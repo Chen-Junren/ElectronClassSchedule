@@ -71,6 +71,14 @@ function registerIpcHandlers({
         if (logger && typeof logger[level] === 'function') logger[level](event, details);
     };
 
+    ipcMain.on('appLogEvent', (_event, event, details) => {
+        if (typeof event !== 'string' || !/^user\\.[a-z0-9_.-]{1,100}$/i.test(event)) {
+            writeLog('warn', 'renderer.log_event_rejected', { reason: 'Invalid event name' });
+            return;
+        }
+        writeLog('info', event, details);
+    });
+
     ipcMain.on('log', (_event, arg) => {
         if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') {
             writeLog('info', 'renderer.log', { value: arg });
