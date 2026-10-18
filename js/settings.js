@@ -63,6 +63,14 @@
             : null
         };
         renderSelectedRegion();
+        window.electronAPI.logEvent('user.weather_region_selected', {
+          adminCode: selectedRegion.adminCode,
+          label: selectedRegion.label,
+          province: selectedRegion.province,
+          city: selectedRegion.city,
+          district: selectedRegion.district,
+          cachedLocationId: Boolean(selectedRegion.qweatherLocationId)
+        });
         showStatus('已选择地区，点击“保存设置”后生效。', true);
       });
       resultsElement.appendChild(button);
@@ -98,6 +106,7 @@
   });
 
   async function applyScheduleDay(day) {
+    window.electronAPI.logEvent('user.manual_schedule_day_selected', { day });
     const scheduleStatus = document.getElementById('scheduleStatus');
     try {
       await window.electronAPI.setScheduleDay(day);
@@ -197,6 +206,7 @@
 
   searchInput.addEventListener('input', () => renderResults(searchInput.value));
   document.getElementById('resetSearch').addEventListener('click', () => {
+    window.electronAPI.logEvent('user.weather_region_search_cleared');
     searchInput.value = '';
     renderResults('');
     showStatus('', true);
@@ -242,6 +252,7 @@
 
   document.querySelectorAll('.nav-item').forEach(button => {
     button.addEventListener('click', () => {
+      window.electronAPI.logEvent('user.settings_section_changed', { section: button.dataset.section });
       document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item === button));
       document.querySelectorAll('.settings-section').forEach(panel => panel.classList.toggle('hidden', panel.dataset.panel !== button.dataset.section));
     });
