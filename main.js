@@ -101,7 +101,11 @@ if (!hasSingleInstanceLock) {
 } else {
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
     ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
-    ipcMain.handle('saveWeatherSettings', (_event, value) => saveWeatherSettings(store, value));
+    ipcMain.handle('saveWeatherSettings', (_event, value) => {
+        const saved = saveWeatherSettings(store, value);
+        if (win && !win.isDestroyed()) win.webContents.send('weatherSettingsChanged');
+        return saved;
+    });
     ipcMain.handle('getWeatherSnapshot', async () => {
         const settings = loadWeatherSettings(store);
         return getWeatherSnapshot(settings, {
