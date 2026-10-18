@@ -80,8 +80,9 @@ test('tray menu initializes once, groups items, and marks the selected week', ()
     harness.handlers.get('getWeekIndex')({}, 2);
     assert.equal(harness.tray.iconPath, '/app/image/icon.png');
     assert.equal(harness.tray.tooltip, '电子课表');
-    assert.equal(harness.template[0].label, '四周循环');
+    assert.equal(harness.template[0].label, '第一周');
     assert.equal(findItem(harness.template, '第三周').checked, true);
+    assert.equal(harness.template.some(item => Array.isArray(item.submenu)), false, 'tray menu should have no submenus');
     assert.deepEqual(harness.sent.slice(-2), [['ClassCountdown', true], ['ClassHidden', true]]);
 });
 
@@ -107,7 +108,7 @@ test('tray handler ignores invalid week selection and missing windows', () => {
     assert.equal(harness.tray, undefined);
     harness.makeWindow();
     harness.handlers.get('getWeekIndex')({}, 99);
-    assert.equal(harness.template[0].submenu.some(item => item.checked === true), false);
+    assert.equal(harness.template.slice(0, 4).some(item => item.checked === true), false);
 });
 
 test('tray configuration menu opens the unified settings window', () => {
@@ -119,15 +120,23 @@ test('tray configuration menu opens the unified settings window', () => {
     assert.equal(harness.settingsOpenCount, 1);
 });
 
-test('tray menu groups settings and behavior and omits source repository links', () => {
+test('tray menu keeps all actions at one level without redundant submenu headings', () => {
     const harness = createHarness();
     harness.makeWindow();
     harness.manager.registerWeekMenuHandler({ on: (channel, callback) => harness.handlers.set(channel, callback) });
     harness.handlers.get('getWeekIndex')({}, 0);
     const labels = allLabels(harness.template);
+    assert.equal(harness.template.some(item => Array.isArray(item.submenu)), false);
     assert.equal(labels.includes('切换日程'), false);
     assert.equal(labels.includes('源码仓库'), false);
-    assert.equal(labels.includes('配置课表与外观'), true);
-    assert.equal(labels.includes('窗口行为'), true);
-    assert.equal(labels.includes('启动与退出'), true);
+    assert.equal(labels.includes('课表与外观设置'), true);
+    assert.equal(labels.includes('第一周'), true);
+    assert.equal(labels.includes('第四周'), true);
+    assert.equal(labels.includes('课上计时'), true);
+    assert.equal(labels.includes('上课隐藏'), true);
+    assert.equal(labels.includes('窗口置顶'), true);
+    assert.equal(labels.includes('开机启动'), true);
+    assert.equal(labels.includes('退出电子课表'), true);
+    assert.equal(labels.includes('窗口行为'), false);
+    assert.equal(labels.includes('启动与退出'), false);
 });
