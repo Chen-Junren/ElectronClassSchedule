@@ -19,7 +19,8 @@ const receiveChannels = new Set([
     'ClassCountdown',
     'ClassHidden',
     'setDayOffset',
-    'getDayOffset'
+    'getDayOffset',
+    'weatherSettingsChanged'
 ]);
 
 contextBridge.exposeInMainWorld('electronAPI', {
