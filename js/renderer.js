@@ -12,6 +12,11 @@
   let miniCountdown = document.getElementById('miniCountdown')
   let rightSidebar = document.getElementById('rightSidebar')
   let leftSidebar = document.getElementById('leftSidebar')
+  let weatherPanel = document.getElementById('weatherPanel')
+  let weatherRegion = document.getElementById('weatherRegion')
+  let weatherCurrent = document.getElementById('weatherCurrent')
+  let weatherDescription = document.getElementById('weatherDescription')
+  let weatherNextHour = document.getElementById('weatherNextHour')
   let root = document.querySelector(':root');
   let isClassCountdown = true
   let isClassHidden = true
@@ -132,6 +137,52 @@
     leftSidebar.style.display = scheduleConfig.week_display ? 'block' : 'none'
   }
 
+
+  function positionWeatherPanel() {
+    if (!weatherPanel || weatherPanel.style.display === 'none' || getComputedStyle(weatherPanel).display === 'none') return;
+    const anchor = rightSidebar.style.display !== 'none' ? rightSidebar : classContainer;
+    const anchorRect = anchor.getBoundingClientRect();
+    const panelWidth = weatherPanel.offsetWidth || 178;
+    let left = anchorRect.right + 12;
+    if (left + panelWidth > window.innerWidth - 12) {
+      left = globalContainer.getBoundingClientRect().left - panelWidth - 12;
+    }
+    weatherPanel.style.left = Math.max(12, left) + 'px';
+  }
+
+  async function refreshWeather() {
+    if (!weatherPanel) return;
+    try {
+      const snapshot = await ipcRenderer.getWeatherSnapshot();
+      if (!snapshot || snapshot.enabled !== true) {
+        weatherPanel.style.display = 'none';
+        return;
+      }
+      weatherPanel.style.display = 'block';
+      weatherRegion.innerText = snapshot.regionLabel || '天气';
+      const temperature = snapshot.now && snapshot.now.temp;
+      const condition = snapshot.now && snapshot.now.text;
+      weatherCurrent.innerText = temperature ? temperature + '°' : '--°';
+      weatherDescription.innerText = condition || '当前天气暂无数据';
+      if (snapshot.nextHour) {
+        const nextTemp = snapshot.nextHour.temp ? snapshot.nextHour.temp + '°' : '--°';
+        const nextText = snapshot.nextHour.text || '暂无天气描述';
+        weatherNextHour.innerText = nextTemp + ' · ' + nextText;
+      } else {
+        weatherNextHour.innerText = '暂无未来一小时预报';
+      }
+      positionWeatherPanel();
+    } catch (error) {
+      weatherPanel.style.display = 'block';
+      weatherRegion.innerText = '天气服务暂不可用';
+      weatherCurrent.innerText = '--°';
+      weatherDescription.innerText = '请检查网络、API Host 和 API Key';
+      weatherNextHour.innerText = '暂时无法获取未来一小时预报';
+      positionWeatherPanel();
+      console.warn('[weather] Failed to refresh weather data');
+    }
+  }
+
   function tick(reset = false) {
     scheduleData = getScheduleData();
     setCountdownerContent()
@@ -144,6 +195,7 @@
       setSidebar()
       setBackgroundDisplay()
     }
+    positionWeatherPanel()
     lastScheduleData = $.extend(true, {}, scheduleData)
   }
 
@@ -293,3 +345,9 @@
     dayOffset = state.dayOffset
     setDayOffsetLastDay = state.setDayOffsetLastDay
   })
+
+
+  ipcRenderer.on('weatherSettingsChanged', () => refreshWeather())
+  window.addEventListener('resize', positionWeatherPanel)
+  refreshWeather()
+  setInterval(refreshWeather, 10 * 60 * 1000)
