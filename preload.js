@@ -23,6 +23,9 @@ const receiveChannels = new Set([
 ]);
 
 contextBridge.exposeInMainWorld('electronAPI', {
+    getChinaDistrictCodes() {
+        return ipcRenderer.invoke('getChinaDistrictCodes');
+    },
     send(channel, ...args) {
         if (!sendChannels.has(channel)) {
             throw new Error('Blocked IPC send channel: ' + channel);
