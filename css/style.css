@@ -259,3 +259,14 @@
     color: var(--weather-muted-text-color, rgba(220, 230, 245, .72));
 }
 .weatherAttribution a { color: inherit; text-decoration: underline; }
+
+.weatherColumns { display: flex; align-items: stretch; gap: 0; }
+.weatherColumn { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; }
+.weatherCurrentColumn { padding-right: 12px; }
+.weatherNextColumn { padding-left: 12px; border-left: 1px solid rgba(255, 255, 255, .2); }
+.weatherColumnTitle { min-height: 14px; color: var(--weather-muted-text-color, rgba(220, 230, 245, .82)); font-size: 10px; }
+.weatherCurrentRow, .weatherNextRow { display: flex; align-items: center; min-height: 48px; gap: 6px; }
+.weatherCurrent { margin-top: 0; font-size: 25px; }
+.weatherDescription { display: block; min-height: 17px; margin-top: 3px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; }
+.weatherNextHour { margin-top: 0; font-size: 11px; overflow-wrap: anywhere; }
+.weatherNextIcon { flex-basis: 22px; width: 22px; font-size: 22px; }
