@@ -10,9 +10,42 @@ const { createTrayManager } = require('./electron/registerTray');
 
 const store = new Store();
 let win;
+let settingsWindow = null;
 
 const getBasePath = () => __dirname + path.sep;
 const getWindow = () => win;
+
+function openSettingsWindow() {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+        settingsWindow.show();
+        settingsWindow.focus();
+        return;
+    }
+
+    settingsWindow = new BrowserWindow({
+        width: 960,
+        height: 760,
+        minWidth: 800,
+        minHeight: 650,
+        show: false,
+        title: '电子课表设置',
+        autoHideMenuBar: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+            nodeIntegration: false,
+            contextIsolation: true,
+            sandbox: true
+        }
+    });
+
+    settingsWindow.loadFile(path.join(__dirname, 'settings.html'));
+    settingsWindow.once('ready-to-show', () => {
+        if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.show();
+    });
+    settingsWindow.on('closed', () => {
+        settingsWindow = null;
+    });
+}
 const { setAutoLaunch } = createAutoLaunchManager({ app, store });
 const trayManager = createTrayManager({
     app,
@@ -20,7 +53,8 @@ const trayManager = createTrayManager({
     getWindow,
     store,
     getBasePath,
-    setAutoLaunch
+    setAutoLaunch,
+    openSettingsWindow
 });
 
 function createWindow() {
@@ -63,6 +97,7 @@ const hasSingleInstanceLock = app.requestSingleInstanceLock({ key: 'classSchedul
 if (!hasSingleInstanceLock) {
     app.quit();
 } else {
+    ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
     trayManager.registerWeekMenuHandler(ipcMain);
     registerIpcHandlers({
         ipcMain,
