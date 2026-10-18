@@ -20,6 +20,7 @@
     <div class="layout">
       <nav class="nav-list" aria-label="设置分类">
         <button class="nav-item active" type="button" data-section="weather">地区与天气</button>
+        <button class="nav-item" type="button" data-section="daySchedule">日程切换</button>
         <button class="nav-item" type="button" data-section="schedule">课表与科目</button>
         <button class="nav-item" type="button" data-section="calendar">学期与调课</button>
         <button class="nav-item" type="button" data-section="appearance">外观与主题</button>
@@ -27,6 +28,31 @@
       </nav>
 
       <section class="content">
+        <section class="settings-section hidden" data-panel="daySchedule">
+          <div class="section-heading">
+            <div>
+              <h2>日程切换</h2>
+              <p>临时指定今天使用星期几的课表；选择“重置”即可恢复按实际日期自动切换。</p>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 class="day-panel-title">今天使用哪一天的课表？</h3>
+            <div class="day-options">
+              <button class="day-choice" type="button" data-day="0">星期日</button>
+              <button class="day-choice" type="button" data-day="1">星期一</button>
+              <button class="day-choice" type="button" data-day="2">星期二</button>
+              <button class="day-choice" type="button" data-day="3">星期三</button>
+              <button class="day-choice" type="button" data-day="4">星期四</button>
+              <button class="day-choice" type="button" data-day="5">星期五</button>
+              <button class="day-choice" type="button" data-day="6">星期六</button>
+            </div>
+            <p class="hint day-hint">适用于临时调课、补课或需要查看其他日期课表的情况。</p>
+            <div class="actions">
+              <button id="resetDaySchedule" class="secondary-button" type="button">重置至当前日期</button>
+            </div>
+            <div id="scheduleStatus" class="notice" role="status" aria-live="polite"></div>
+          </div>
+        </section>
         <section class="settings-section" data-panel="weather">
           <div class="section-heading">
             <div>
