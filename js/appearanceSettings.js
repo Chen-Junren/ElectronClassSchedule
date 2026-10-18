@@ -5,6 +5,7 @@
     settingsBackground: '#f4f6fa',
     barBackground: '#000000',
     classText: '#ffffff',
+    pastClassText: '#a6a6a6',
     highlightText: '#00ff0a',
     countdownClassText: '#00ff0a',
     countdownText: '#ffffff',
@@ -18,6 +19,7 @@
     settingsBackground: 'appearanceSettingsBackground',
     barBackground: 'appearanceBarBackground',
     classText: 'appearanceClassText',
+    pastClassText: 'appearancePastClassText',
     highlightText: 'appearanceHighlightText',
     countdownClassText: 'appearanceCountdownClassText',
     countdownText: 'appearanceCountdownText',
@@ -49,6 +51,7 @@
     document.documentElement.style.setProperty('--settings-background', settings.settingsBackground);
     preview.style.backgroundColor = 'color-mix(in srgb, ' + settings.barBackground + ' 78%, transparent)';
     preview.style.setProperty('--preview-class-text', settings.classText);
+    preview.style.setProperty('--preview-past-class-text', settings.pastClassText);
     preview.style.setProperty('--preview-highlight-text', settings.highlightText);
     preview.style.setProperty('--preview-countdown-class-text', settings.countdownClassText);
     preview.style.setProperty('--preview-countdown-text', settings.countdownText);
