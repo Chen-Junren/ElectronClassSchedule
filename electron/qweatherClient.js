@@ -10,7 +10,7 @@ function makeUrl(host, pathname, params) {
     return url.toString();
 }
 
-async function requestJson(fetchImpl, url, logger) {
+async function requestJson(fetchImpl, url, logger, apiKey) {
     const startedAt = Date.now();
     const parsedUrl = new URL(url);
     const requestDetails = {
@@ -22,7 +22,7 @@ async function requestJson(fetchImpl, url, logger) {
     if (logger && typeof logger.info === 'function') logger.info('weather.api.request', requestDetails);
 
     try {
-        const response = await fetchImpl(url, { headers: { Accept: 'application/json' } });
+        const response = await fetchImpl(url, { headers: { Accept: 'application/json', 'X-QW-Api-Key': apiKey } });
         if (!response || response.ok === false) {
             let body = null;
             if (response && typeof response.json === 'function') {
@@ -116,15 +116,13 @@ async function getWeatherSnapshot(settings, options = {}) {
     if (!locationId) {
         const lookupParams = {
             location: region.district + ',' + region.city + ',' + region.province,
-            key: settings.apiKey
         };
-        let lookup = await requestJson(fetchImpl, makeUrl(settings.geoApiHost || 'geoapi.qweather.com', '/v2/city/lookup', lookupParams), logger);
+        let lookup = await requestJson(fetchImpl, makeUrl(settings.geoApiHost || 'geoapi.qweather.com', '/v2/city/lookup', lookupParams), logger, settings.apiKey);
         let selected = chooseLocation(lookup.location, region);
         if (!selected) {
             lookup = await requestJson(fetchImpl, makeUrl(settings.geoApiHost || 'geoapi.qweather.com', '/v2/city/lookup', {
                 location: region.district,
-                key: settings.apiKey
-            }), logger);
+            }), logger, settings.apiKey);
             selected = chooseLocation(lookup.location, region);
         }
         if (!selected || !selected.id) {
@@ -138,10 +136,10 @@ async function getWeatherSnapshot(settings, options = {}) {
         if (typeof options.saveSettings === 'function') await options.saveSettings(updatedSettings);
     }
 
-    const common = { location: locationId, key: settings.apiKey };
+    const common = { location: locationId };
     const [nowPayload, hourlyPayload] = await Promise.all([
-        requestJson(fetchImpl, makeUrl(settings.apiHost, '/v7/weather/now', common), logger),
-        requestJson(fetchImpl, makeUrl(settings.apiHost, '/v7/weather/1h', common), logger)
+        requestJson(fetchImpl, makeUrl(settings.apiHost, '/v7/weather/now', common), logger, settings.apiKey),
+        requestJson(fetchImpl, makeUrl(settings.apiHost, '/v7/weather/24h', common), logger, settings.apiKey)
     ]);
     const now = nowPayload.now || {};
     const hours = Array.isArray(hourlyPayload.hourly) ? hourlyPayload.hourly : [];
