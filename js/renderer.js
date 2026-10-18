@@ -18,6 +18,37 @@
   let weatherDescription = document.getElementById('weatherDescription')
   let weatherNextHour = document.getElementById('weatherNextHour')
   let root = document.querySelector(':root');
+
+  function hexToRgb(value) {
+    const match = /^#([0-9a-f]{6})$/i.exec(String(value || ''));
+    if (!match) return null;
+    const number = Number.parseInt(match[1], 16);
+    return [(number >> 16) & 255, (number >> 8) & 255, number & 255].join(', ');
+  }
+
+  function applyAppearanceSettings(settings) {
+    if (!settings || typeof settings !== 'object') return;
+    const colorVariables = {
+      classText: '--class-text-color',
+      highlightText: '--highlight-text-color',
+      countdownClassText: '--countdown-class-text-color',
+      countdownText: '--countdown-text-color',
+      leftSidebarText: '--left-sidebar-text-color',
+      rightSidebarText: '--right-sidebar-text-color',
+      weatherText: '--weather-text-color',
+      weatherMutedText: '--weather-muted-text-color'
+    };
+    for (const [key, variable] of Object.entries(colorVariables)) {
+      if (typeof settings[key] === 'string') root.style.setProperty(variable, settings[key]);
+    }
+    const backgroundRgb = hexToRgb(settings.barBackground);
+    if (backgroundRgb) root.style.setProperty('--bar-bg-rgb', backgroundRgb);
+  }
+
+  ipcRenderer.getAppearanceSettings().then(applyAppearanceSettings).catch(error => {
+    console.warn('[appearance] Could not load appearance settings:', error.message || error);
+  });
+  ipcRenderer.on('appearanceSettingsChanged', (_event, settings) => applyAppearanceSettings(settings));
   let isClassCountdown = true
   let isClassHidden = true
   let lastScheduleData = {
@@ -49,7 +80,7 @@
       }
       else {
         if (scheduleData.currentHighlight.index > i)
-          classHtml += `<div class="class" style="color:rgba(166,166,166);">${inner}</div>`
+          classHtml += `<div class="class past">${inner}</div>`
         else
           classHtml += `<div class="class">${inner}</div>`
       }
@@ -68,7 +99,7 @@
 
   function setCountdownerContent() {
     currentFullName.innerText = scheduleData.currentHighlight.fullName;
-    currentFullName.style.color = scheduleData.currentHighlight.type === 'current' ? 'rgba(0, 255, 10, 1)' : 'rgba(255, 255, 5, 1)'
+    currentFullName.style.color = scheduleData.currentHighlight.type === 'current' ? 'var(--countdown-class-text-color, #00ff0a)' : 'var(--highlight-text-color, #00ff0a)'
     countdownText.innerText = scheduleData.currentHighlight.countdownText;
     if (scheduleData.currentHighlight.type === 'current') {
       if (isClassCountdown) {
