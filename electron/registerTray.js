@@ -1,4 +1,7 @@
-function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, openSettingsWindow, Menu: menuApi, Tray: trayApi, shell: shellApi }) {
+function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, openSettingsWindow, logger, Menu: menuApi, Tray: trayApi, shell: shellApi }) {
+    const writeLog = (level, event, details) => {
+        if (logger && typeof logger[level] === 'function') logger[level](event, details);
+    };
     if (!menuApi || !trayApi || !shellApi) {
         const electron = require('electron');
         menuApi = menuApi || electron.Menu;
@@ -21,11 +24,12 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
             if (!tray) {
                 tray = new trayApi(getBasePath() + 'image/icon.png');
                 tray.setToolTip('电子课表');
-                const showMenu = () => {
+                const showMenu = (source) => {
+                    writeLog('info', 'user.tray_menu.opened', { source });
                     if (form) tray.popUpContextMenu(form);
                 };
-                tray.on('click', showMenu);
-                tray.on('right-click', showMenu);
+                tray.on('click', () => showMenu('left-click'));
+                tray.on('right-click', () => showMenu('right-click'));
             }
 
             const sendToWindow = (channel, ...args) => {
@@ -35,11 +39,15 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 }
             };
 
+            const selectWeek = (weekIndex) => {
+                writeLog('info', 'user.schedule_week_selected', { weekIndex });
+                sendToWindow('setWeekIndex', weekIndex);
+            };
             const weekMenu = [
-                { label: '第一周', type: 'radio', click: () => sendToWindow('setWeekIndex', 0) },
-                { label: '第二周', type: 'radio', click: () => sendToWindow('setWeekIndex', 1) },
-                { label: '第三周', type: 'radio', click: () => sendToWindow('setWeekIndex', 2) },
-                { label: '第四周', type: 'radio', click: () => sendToWindow('setWeekIndex', 3) }
+                { label: '第一周', type: 'radio', click: () => selectWeek(0) },
+                { label: '第二周', type: 'radio', click: () => selectWeek(1) },
+                { label: '第三周', type: 'radio', click: () => selectWeek(2) },
+                { label: '第四周', type: 'radio', click: () => selectWeek(3) }
             ];
 
             const settingsAndTools = [
@@ -48,6 +56,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     label: '配置课表与外观',
                     sublabel: '课程、天气、主题和配色',
                     click: () => {
+                        writeLog('info', 'user.settings_menu_selected', { source: 'tray' });
                         if (typeof openSettingsWindow === 'function') openSettingsWindow();
                         else sendToWindow('openSettingDialog');
                     }
@@ -56,7 +65,10 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     icon: getBasePath() + 'image/clock.png',
                     label: '矫正计时',
                     sublabel: '修正课表与系统时间的偏差',
-                    click: () => sendToWindow('getTimeOffset')
+                    click: () => {
+                        writeLog('info', 'user.time_offset_menu_selected');
+                        sendToWindow('getTimeOffset');
+                    }
                 }
             ];
 
@@ -67,6 +79,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     type: 'checkbox',
                     checked: store.get('isDuringClassCountdown', true),
                     click: (event) => {
+                        writeLog('info', 'user.countdown_display_toggled', { enabled: event.checked });
                         store.set('isDuringClassCountdown', event.checked);
                         sendToWindow('ClassCountdown', event.checked);
                     }
@@ -76,6 +89,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     type: 'checkbox',
                     checked: store.get('isWindowAlwaysOnTop', true),
                     click: (event) => {
+                        writeLog('info', 'user.window_always_on_top_toggled', { enabled: event.checked });
                         store.set('isWindowAlwaysOnTop', event.checked);
                         const currentWindow = getWindow();
                         if (!currentWindow || currentWindow.isDestroyed()) return;
@@ -91,6 +105,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     type: 'checkbox',
                     checked: store.get('isDuringClassHidden', true),
                     click: (event) => {
+                        writeLog('info', 'user.class_window_hidden_toggled', { enabled: event.checked });
                         store.set('isDuringClassHidden', event.checked);
                         sendToWindow('ClassHidden', event.checked);
                     }
@@ -103,6 +118,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     type: 'checkbox',
                     checked: store.get('isAutoLaunch', false),
                     click: (event) => {
+                        writeLog('info', 'user.auto_launch_toggled', { enabled: event.checked });
                         store.set('isAutoLaunch', event.checked);
                         setAutoLaunch();
                     }
@@ -112,6 +128,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     icon: getBasePath() + 'image/quit.png',
                     label: '退出电子课表',
                     click: () => {
+                        writeLog('info', 'user.quit_menu_selected');
                         const currentWindow = getWindow();
                         if (!currentWindow || currentWindow.isDestroyed()) return;
                         dialog.showMessageBox(currentWindow, {
@@ -121,8 +138,12 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                             defaultId: 0,
                             cancelId: 0
                         }).then((result) => {
+                            writeLog('info', result.response === 1 ? 'user.quit_confirmed' : 'user.quit_cancelled', {
+                                response: result.response
+                            });
                             if (result.response === 1) app.quit();
                         }).catch((error) => {
+                            writeLog('error', 'tray.quit_confirmation_failed', error);
                             console.error('[tray] Failed to show quit confirmation:', error);
                         });
                     }
