@@ -2,11 +2,11 @@
   color-scheme: light;
   font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
   color: #202938;
-  background: #f4f6fa;
+  background: var(--settings-background, #f4f6fa);
   font-synthesis: none;
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-width: 760px; min-height: 100vh; background: #f4f6fa; }
+body { margin: 0; min-width: 760px; min-height: 100vh; background: var(--settings-background, #f4f6fa); }
 button, input { font: inherit; }
 button { cursor: pointer; }
 .app-shell { min-height: 100vh; }
@@ -72,3 +72,21 @@ input + .hint { margin-top: 7px; margin-bottom: 16px; }
 .date-override-info span { color: #818b9b; font-size: 12px; overflow-wrap: anywhere; }
 .date-override-row .secondary-button { flex-shrink: 0; padding: 7px 12px; }
 @media (max-width: 900px) { .calendar-grid { grid-template-columns: 1fr; } }
+
+
+/* Appearance settings */
+.appearance-panel-heading { margin-bottom: 16px; }
+.appearance-panel-heading h3, .appearance-group-title, .appearance-preview-panel h3 { margin-bottom: 6px; font-size: 15px; }
+.color-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.color-setting { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; padding: 12px 13px; border: 1px solid #e5e9f0; border-radius: 10px; background: #fbfcfe; cursor: pointer; }
+.color-setting span { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.color-setting strong { color: #344054; font-size: 13px; }
+.color-setting small { color: #8992a2; font-size: 11px; line-height: 1.4; }
+.color-setting input[type="color"] { flex: 0 0 42px; width: 42px; height: 34px; padding: 3px; border: 1px solid #d5dce7; border-radius: 8px; background: #fff; cursor: pointer; }
+.appearance-group-title { margin-bottom: 15px; }
+.appearance-preview-panel { overflow: hidden; }
+.appearance-preview { display: flex; align-items: center; gap: 16px; margin: 12px 0; padding: 18px 20px; border-radius: 12px; background: rgba(0,0,0,.78); color: var(--preview-class-text, #fff); }
+.preview-week { color: var(--preview-left-text, #00eeff); font-size: 12px; }
+.preview-course { flex: 1; font-size: 15px; }
+.preview-current { color: var(--preview-highlight-text, #00ff0a); font-size: 13px; font-weight: 700; }
+@media (max-width: 900px) { .color-grid { grid-template-columns: 1fr; } }
