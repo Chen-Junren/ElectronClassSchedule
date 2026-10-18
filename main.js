@@ -21,7 +21,8 @@ logger.info('app.start', {
     version: app.getVersion(),
     platform: process.platform,
     architecture: process.arch,
-    packaged: app.isPackaged
+    packaged: app.isPackaged,
+    logFilePath: logger.filePath
 });
 process.on('uncaughtException', (error) => {
     logger.error('process.uncaughtException', error);
