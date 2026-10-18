@@ -130,3 +130,15 @@ test('tray configuration menu opens the unified settings window', () => {
     harness.template[5].click();
     assert.equal(harness.settingsOpenCount, 1);
 });
+
+
+test('tray menu no longer contains schedule switching or source repository entries', () => {
+    const harness = createHarness();
+    harness.makeWindow();
+    harness.manager.registerWeekMenuHandler({ on: (channel, callback) => harness.handlers.set(channel, callback) });
+    harness.handlers.get('getWeekIndex')({}, 0);
+    const labels = harness.template.map(item => item.label).filter(Boolean);
+    assert.equal(labels.includes('切换日程'), false);
+    assert.equal(labels.includes('源码仓库'), false);
+    assert.equal(labels.includes('配置课表'), true);
+});
