@@ -233,7 +233,7 @@
       const temperature = snapshot.now && snapshot.now.temp;
       const condition = snapshot.now && snapshot.now.text;
       weatherCurrent.innerText = temperature !== null && temperature !== undefined && temperature !== '' ? temperature + '°' : '--°';
-      weatherDescription.innerText = condition || '当前天气暂无数据';
+      weatherDescription.innerText = condition || '未获取到天气信息';
       setWeatherIcon(weatherIcon, snapshot.now && snapshot.now.icon, condition);
       if (snapshot.nextHour) {
         const nextTemp = snapshot.nextHour.temp ? snapshot.nextHour.temp + '°' : '--°';
@@ -241,7 +241,7 @@
         weatherNextHour.innerText = nextTemp + ' · ' + nextText;
         setWeatherIcon(weatherNextIcon, snapshot.nextHour.icon, nextText);
       } else {
-        weatherNextHour.innerText = '暂无未来一小时预报';
+        weatherNextHour.innerText = '未获取到天气信息';
         setWeatherIcon(weatherNextIcon, null, '');
       }
       positionWeatherPanel();
