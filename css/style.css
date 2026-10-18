@@ -246,8 +246,8 @@
 .countdowner { background-color: rgba(var(--bar-bg-rgb, 0, 0, 0), var(--global-bg-opacity)); }
 .miniCountdown { background-color: rgba(var(--bar-bg-rgb, 0, 0, 0), var(--global-bg-opacity)); }
 .weatherCurrentRow { display: flex; align-items: center; gap: 10px; }
-.weatherIcon { display: none; width: 44px; height: 44px; object-fit: contain; flex: 0 0 44px; }
+.weatherIcon { display: none; flex: 0 0 44px; width: 44px; font-size: 44px; line-height: 1; text-align: center; color: var(--weather-text-color, #fff); }
 .weatherDescription { display: none; }
 .weatherNextRow { display: flex; align-items: center; gap: 7px; }
-.weatherNextIcon { display: none; width: 24px; height: 24px; object-fit: contain; flex: 0 0 24px; }
+.weatherNextIcon { display: none; flex: 0 0 24px; width: 24px; font-size: 24px; line-height: 1; text-align: center; color: var(--weather-muted-text-color, #dce6f5); }
 .weatherNextHour { min-width: 0; }
