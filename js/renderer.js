@@ -16,6 +16,8 @@
   let weatherRegion = document.getElementById('weatherRegion')
   let weatherCurrent = document.getElementById('weatherCurrent')
   let weatherDescription = document.getElementById('weatherDescription')
+  let weatherIcon = document.getElementById('weatherIcon')
+  let weatherNextIcon = document.getElementById('weatherNextIcon')
   let weatherNextHour = document.getElementById('weatherNextHour')
   let root = document.querySelector(':root');
 
@@ -188,6 +190,26 @@
     weatherPanel.style.left = Math.max(12, left) + 'px';
   }
 
+  function setWeatherIcon(imageElement, code, description) {
+    if (!imageElement) return;
+    const normalizedCode = typeof code === 'string' && /^\\d{3}$/.test(code) ? code : '';
+    if (!normalizedCode) {
+      imageElement.removeAttribute('src');
+      imageElement.style.display = 'none';
+      return;
+    }
+    const source = 'https://a.hecdn.net/img/common/icon/202106d/' + normalizedCode + '.png';
+    if (imageElement.dataset.iconCode === normalizedCode && imageElement.src === source) return;
+    imageElement.dataset.iconCode = normalizedCode;
+    imageElement.alt = description || '天气图标';
+    imageElement.style.display = 'block';
+    imageElement.onerror = () => {
+      imageElement.style.display = 'none';
+      imageElement.removeAttribute('src');
+    };
+    imageElement.src = source;
+  }
+
   async function refreshWeather() {
     if (!weatherPanel) return;
     try {
@@ -200,14 +222,17 @@
       weatherRegion.innerText = snapshot.regionLabel || '天气';
       const temperature = snapshot.now && snapshot.now.temp;
       const condition = snapshot.now && snapshot.now.text;
-      weatherCurrent.innerText = temperature ? temperature + '°' : '--°';
+      weatherCurrent.innerText = temperature !== null && temperature !== undefined && temperature !== '' ? temperature + '°' : '--°';
       weatherDescription.innerText = condition || '当前天气暂无数据';
+      setWeatherIcon(weatherIcon, snapshot.now && snapshot.now.icon, condition);
       if (snapshot.nextHour) {
         const nextTemp = snapshot.nextHour.temp ? snapshot.nextHour.temp + '°' : '--°';
         const nextText = snapshot.nextHour.text || '暂无天气描述';
         weatherNextHour.innerText = nextTemp + ' · ' + nextText;
+        setWeatherIcon(weatherNextIcon, snapshot.nextHour.icon, nextText);
       } else {
         weatherNextHour.innerText = '暂无未来一小时预报';
+        setWeatherIcon(weatherNextIcon, null, '');
       }
       positionWeatherPanel();
     } catch (error) {
@@ -216,6 +241,8 @@
       weatherCurrent.innerText = '--°';
       weatherDescription.innerText = '请检查网络、API Host 和 API Key';
       weatherNextHour.innerText = '暂时无法获取未来一小时预报';
+      setWeatherIcon(weatherIcon, null, '');
+      setWeatherIcon(weatherNextIcon, null, '');
       positionWeatherPanel();
       console.warn('[weather] Failed to refresh weather data');
     }
