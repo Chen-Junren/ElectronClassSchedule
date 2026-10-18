@@ -13,7 +13,6 @@
   let rightSidebar = document.getElementById('rightSidebar')
   let leftSidebar = document.getElementById('leftSidebar')
   let weatherPanel = document.getElementById('weatherPanel')
-  let weatherRegion = document.getElementById('weatherRegion')
   let weatherCurrent = document.getElementById('weatherCurrent')
   let weatherDescription = document.getElementById('weatherDescription')
   let weatherIcon = document.getElementById('weatherIcon')
@@ -223,7 +222,6 @@
   function showWeatherUnavailable(message = '未获取到天气信息') {
     if (!weatherPanel) return;
     weatherPanel.style.display = 'block';
-    weatherRegion.innerText = '天气';
     weatherCurrent.innerText = '--°';
     weatherDescription.innerText = message;
     weatherNextHour.innerText = message;
@@ -243,7 +241,6 @@
         return;
       }
       weatherPanel.style.display = 'block';
-      weatherRegion.innerText = snapshot.regionLabel || '天气';
       const temperature = snapshot.now && snapshot.now.temp;
       const condition = snapshot.now && snapshot.now.text;
       weatherCurrent.innerText = temperature !== null && temperature !== undefined && temperature !== '' ? temperature + '°' : '--°';
