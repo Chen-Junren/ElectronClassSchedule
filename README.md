@@ -61,3 +61,10 @@
 ## Weather icons
 
 The weather panel uses the official [QWeather Icons](https://icons.qweather.com/) icon font, installed as the `qweather-icons` npm dependency and loaded from `node_modules` at runtime. The icon font and stylesheet are bundled with the application, so displaying weather icons does not require network access after installation; the weather data itself still requires a working network connection. QWeather Icons source code is MIT-licensed; icon designs are licensed under CC BY 4.0. See the [installation](https://icons.qweather.com/install/) and [usage](https://icons.qweather.com/usage/) documentation.
+
+
+## Application logs
+
+The application writes structured JSON Lines logs to `app.getPath('userData')/logs/app.log` (on Windows, typically under the current user's AppData/Roaming application-data folder). Each line includes an ISO 8601 timestamp, severity level, event name, and structured details. Startup/window errors, settings saves, tray/menu operations, weather API query parameters, HTTP status, response body, request duration, and failures are recorded to help diagnose issues such as unavailable weather data.
+
+The log is limited to **5 MiB total** in a single file. When it approaches the limit, older rows are discarded and recent complete rows are retained. API keys, tokens, passwords, and secret query parameters are redacted before writing. The log can still contain configuration choices, selected region names, and API response data, so review it before sharing.
