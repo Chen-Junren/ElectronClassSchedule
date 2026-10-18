@@ -193,9 +193,11 @@
   function setWeatherIcon(imageElement, code, description) {
     if (!imageElement) return;
     const normalizedCode = typeof code === 'string' && /^\\d{3}$/.test(code) ? code : '';
+    const descriptionElement = imageElement.id === 'weatherIcon' ? weatherDescription : null;
     if (!normalizedCode) {
       imageElement.removeAttribute('src');
       imageElement.style.display = 'none';
+      if (descriptionElement) descriptionElement.style.display = 'block';
       return;
     }
     const source = 'https://a.hecdn.net/img/common/icon/202106d/' + normalizedCode + '.png';
@@ -203,9 +205,11 @@
     imageElement.dataset.iconCode = normalizedCode;
     imageElement.alt = description || '天气图标';
     imageElement.style.display = 'block';
+    if (descriptionElement) descriptionElement.style.display = 'none';
     imageElement.onerror = () => {
       imageElement.style.display = 'none';
       imageElement.removeAttribute('src');
+      if (descriptionElement) descriptionElement.style.display = 'block';
     };
     imageElement.src = source;
   }
