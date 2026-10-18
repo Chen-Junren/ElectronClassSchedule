@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveWeatherSettings(settings) {
         return ipcRenderer.invoke('saveWeatherSettings', settings);
     },
+    getWeatherSnapshot() {
+        return ipcRenderer.invoke('getWeatherSnapshot');
+    },
     send(channel, ...args) {
         if (!sendChannels.has(channel)) {
             throw new Error('Blocked IPC send channel: ' + channel);
