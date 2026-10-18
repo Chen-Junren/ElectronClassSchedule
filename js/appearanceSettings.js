@@ -47,10 +47,15 @@
 
   function applyPreview(settings) {
     document.documentElement.style.setProperty('--settings-background', settings.settingsBackground);
-    preview.style.backgroundColor = settings.barBackground;
+    preview.style.backgroundColor = 'color-mix(in srgb, ' + settings.barBackground + ' 78%, transparent)';
     preview.style.setProperty('--preview-class-text', settings.classText);
-    preview.style.setProperty('--preview-left-text', settings.leftSidebarText);
     preview.style.setProperty('--preview-highlight-text', settings.highlightText);
+    preview.style.setProperty('--preview-countdown-class-text', settings.countdownClassText);
+    preview.style.setProperty('--preview-countdown-text', settings.countdownText);
+    preview.style.setProperty('--preview-left-text', settings.leftSidebarText);
+    preview.style.setProperty('--preview-right-text', settings.rightSidebarText);
+    preview.style.setProperty('--preview-weather-text', settings.weatherText);
+    preview.style.setProperty('--preview-weather-muted-text', settings.weatherMutedText);
   }
 
   function showStatus(message, success) {
