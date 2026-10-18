@@ -60,4 +60,4 @@
 
 ## Weather icons
 
-The weather panel uses the official [QWeather Icons](https://icons.qweather.com/) icon font and maps icon classes to the icon codes returned by the QWeather API. The icon stylesheet is loaded from jsDelivr, so displaying icons requires network access. QWeather Icons source code is MIT-licensed; icon designs are licensed under CC BY 4.0. See the [installation](https://icons.qweather.com/install/) and [usage](https://icons.qweather.com/usage/) documentation.
+The weather panel uses the official [QWeather Icons](https://icons.qweather.com/) icon font, installed as the `qweather-icons` npm dependency and loaded from `node_modules` at runtime. The icon font and stylesheet are bundled with the application, so displaying weather icons does not require network access after installation; the weather data itself still requires a working network connection. QWeather Icons source code is MIT-licensed; icon designs are licensed under CC BY 4.0. See the [installation](https://icons.qweather.com/install/) and [usage](https://icons.qweather.com/usage/) documentation.
