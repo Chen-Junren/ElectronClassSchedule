@@ -20,6 +20,16 @@
   let weatherNextIcon = document.getElementById('weatherNextIcon')
   let weatherNextHour = document.getElementById('weatherNextHour')
   let root = document.querySelector(':root');
+  const qweatherIconStylesheet = document.getElementById('qweatherIconStylesheet');
+  let weatherIconsAvailable = Boolean(qweatherIconStylesheet && qweatherIconStylesheet.sheet);
+  if (qweatherIconStylesheet) {
+    qweatherIconStylesheet.addEventListener('error', () => {
+      weatherIconsAvailable = false;
+      if (weatherIcon) weatherIcon.style.display = 'none';
+      if (weatherNextIcon) weatherNextIcon.style.display = 'none';
+      if (weatherDescription) weatherDescription.style.display = 'block';
+    });
+  }
 
   function hexToRgb(value) {
     const match = /^#([0-9a-f]{6})$/i.exec(String(value || ''));
@@ -194,7 +204,7 @@
     if (!iconElement) return;
     const normalizedCode = typeof code === 'string' && /^\\d{3}$/.test(code) ? code : '';
     const descriptionElement = iconElement.id === 'weatherIcon' ? weatherDescription : null;
-    if (!normalizedCode) {
+    if (!normalizedCode || !weatherIconsAvailable) {
       iconElement.className = iconElement.id === 'weatherIcon' ? 'weatherIcon' : 'weatherNextIcon';
       iconElement.style.display = 'none';
       if (descriptionElement) descriptionElement.style.display = 'block';
