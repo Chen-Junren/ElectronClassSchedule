@@ -7,6 +7,7 @@ const { DisableMinimize } = require('electron-disable-minimize');
 const { createAutoLaunchManager } = require('./electron/autoLaunch');
 const { registerIpcHandlers } = require('./electron/registerIpcHandlers');
 const { createTrayManager } = require('./electron/registerTray');
+const { loadWeatherSettings, saveWeatherSettings } = require('./electron/weatherSettingsStore');
 
 const store = new Store();
 let win;
@@ -98,6 +99,8 @@ if (!hasSingleInstanceLock) {
     app.quit();
 } else {
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
+    ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
+    ipcMain.handle('saveWeatherSettings', (_event, value) => saveWeatherSettings(store, value));
     trayManager.registerWeekMenuHandler(ipcMain);
     registerIpcHandlers({
         ipcMain,
