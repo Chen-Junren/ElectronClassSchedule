@@ -5,6 +5,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
         trayApi = trayApi || electron.Tray;
         shellApi = shellApi || electron.shell;
     }
+
     let tray;
     let form;
 
@@ -14,12 +15,12 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
 
     function registerWeekMenuHandler(ipcMain) {
         ipcMain.on('getWeekIndex', (_event, arg) => {
-            const win = getWindow();
-            if (!win || win.isDestroyed()) return;
+            const initialWindow = getWindow();
+            if (!initialWindow || initialWindow.isDestroyed()) return;
 
             if (!tray) {
                 tray = new trayApi(getBasePath() + 'image/icon.png');
-                tray.setToolTip('电子课表 - by lsl');
+                tray.setToolTip('电子课表');
                 const showMenu = () => {
                     if (form) tray.popUpContextMenu(form);
                 };
@@ -34,15 +35,18 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 }
             };
 
-            const template = [
+            const weekMenu = [
                 { label: '第一周', type: 'radio', click: () => sendToWindow('setWeekIndex', 0) },
                 { label: '第二周', type: 'radio', click: () => sendToWindow('setWeekIndex', 1) },
                 { label: '第三周', type: 'radio', click: () => sendToWindow('setWeekIndex', 2) },
-                { label: '第四周', type: 'radio', click: () => sendToWindow('setWeekIndex', 3) },
-                { type: 'separator' },
+                { label: '第四周', type: 'radio', click: () => sendToWindow('setWeekIndex', 3) }
+            ];
+
+            const settingsAndTools = [
                 {
                     icon: getBasePath() + 'image/setting.png',
-                    label: '配置课表',
+                    label: '配置课表与外观',
+                    sublabel: '课程、天气、主题和配色',
                     click: () => {
                         if (typeof openSettingsWindow === 'function') openSettingsWindow();
                         else sendToWindow('openSettingDialog');
@@ -51,9 +55,12 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 {
                     icon: getBasePath() + 'image/clock.png',
                     label: '矫正计时',
+                    sublabel: '修正课表与系统时间的偏差',
                     click: () => sendToWindow('getTimeOffset')
-                },
-                { type: 'separator' },
+                }
+            ];
+
+            const windowBehavior = [
                 {
                     id: 'countdown',
                     label: '课上计时',
@@ -72,7 +79,7 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                         store.set('isWindowAlwaysOnTop', event.checked);
                         const currentWindow = getWindow();
                         if (!currentWindow || currentWindow.isDestroyed()) return;
-                        if (store.get('isWindowAlwaysOnTop', true)) {
+                        if (event.checked) {
                             currentWindow.setAlwaysOnTop(true, 'screen-saver', 9999999999999);
                         } else {
                             currentWindow.setAlwaysOnTop(false);
@@ -87,11 +94,14 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                         store.set('isDuringClassHidden', event.checked);
                         sendToWindow('ClassHidden', event.checked);
                     }
-                },
+                }
+            ];
+
+            const startupAndExit = [
                 {
                     label: '开机启动',
                     type: 'checkbox',
-                    checked: store.get('isAutoLaunch', true),
+                    checked: store.get('isAutoLaunch', false),
                     click: (event) => {
                         store.set('isAutoLaunch', event.checked);
                         setAutoLaunch();
@@ -100,14 +110,16 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 { type: 'separator' },
                 {
                     icon: getBasePath() + 'image/quit.png',
-                    label: '退出程序',
+                    label: '退出电子课表',
                     click: () => {
                         const currentWindow = getWindow();
                         if (!currentWindow || currentWindow.isDestroyed()) return;
                         dialog.showMessageBox(currentWindow, {
-                            title: '请确认',
-                            message: '你确定要退出程序吗?',
-                            buttons: ['取消', '确定']
+                            title: '退出电子课表',
+                            message: '确定要退出电子课表吗？',
+                            buttons: ['取消', '退出'],
+                            defaultId: 0,
+                            cancelId: 0
                         }).then((result) => {
                             if (result.response === 1) app.quit();
                         }).catch((error) => {
@@ -119,8 +131,17 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
 
             const selectedWeek = Number(arg);
             if (Number.isInteger(selectedWeek) && selectedWeek >= 0 && selectedWeek <= 3) {
-                template[selectedWeek].checked = true;
+                weekMenu[selectedWeek].checked = true;
             }
+
+            const template = [
+                { label: '四周循环', submenu: weekMenu },
+                { type: 'separator' },
+                { label: '设置与工具', submenu: settingsAndTools },
+                { type: 'separator' },
+                { label: '窗口行为', submenu: windowBehavior },
+                { label: '启动与退出', submenu: startupAndExit }
+            ];
 
             form = menuApi.buildFromTemplate(template);
             tray.setContextMenu(form);
