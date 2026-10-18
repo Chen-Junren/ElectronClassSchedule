@@ -53,16 +53,6 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                     label: '矫正计时',
                     click: () => sendToWindow('getTimeOffset')
                 },
-                {
-                    icon: getBasePath() + 'image/toggle.png',
-                    label: '切换日程',
-                    click: () => sendToWindow('setDayOffset')
-                },
-                {
-                    icon: getBasePath() + 'image/github.png',
-                    label: '源码仓库',
-                    click: () => shellApi.openExternal('https://github.com/EnderWolf006/ElectronClassSchedule')
-                },
                 { type: 'separator' },
                 {
                     id: 'countdown',
