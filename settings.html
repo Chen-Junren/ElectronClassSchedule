@@ -82,9 +82,10 @@
               </div>
               <label class="toggle">
                 <input id="weatherEnabled" type="checkbox">
-                <span>启用天气面板</span>
+                <span>启用天气数据获取</span>
               </label>
             </div>
+            <p class="hint">天气悬浮栏会始终保留；若未启用、尚未配置或服务请求失败，会显示“未获取到天气信息”。启用数据获取前，请选择地区并填写 API Key。</p>
             <label class="field-label" for="qweatherHost">API Host</label>
             <input id="qweatherHost" type="text" autocomplete="off" value="api.qweather.com" placeholder="api.qweather.com">
             <p class="hint">填写你的 QWeather 控制台提供的天气 API Host，不要填写协议或路径。</p>
