@@ -5,6 +5,7 @@ var weekIndex = initialAppState.weekIndex;
 var timeOffset = initialAppState.timeOffset;
 var dayOffset = initialAppState.dayOffset;
 var setDayOffsetLastDay = initialAppState.setDayOffsetLastDay;
+var dateOverrides = [];
 
 function getCurrentEditedDate() {
     const date = new Date();
@@ -13,6 +14,8 @@ function getCurrentEditedDate() {
 }
 
 function getCurrentEditedDay(date) {
+    const dateOverride = AppStateStore.findDateOverride(date, dateOverrides);
+    if (dateOverride && dateOverride.type === 'classDay') return dateOverride.dayOfWeek;
     const actualToday = new Date().getDay();
     const effectiveDay = AppStateStore.getEffectiveDay(localStorage, date, actualToday);
     const state = AppStateStore.loadState(localStorage);
@@ -60,6 +63,16 @@ function getCurrentTime(now = getCurrentEditedDate()) {
 function getScheduleData() {
     // Use one edited timestamp so schedule, clock and weekday cannot disagree at midnight.
     const date = getCurrentEditedDate();
+    const dateOverride = AppStateStore.findDateOverride(date, dateOverrides);
+    if (dateOverride && dateOverride.type === 'holiday') {
+        return {
+            scheduleArray: [],
+            currentHighlight: { index: null, type: null, fullName: null, countdown: null, countdownText: null },
+            timetable: undefined,
+            divider: [],
+            noClasses: true
+        };
+    }
     const dayOfWeek = getCurrentEditedDay(date);
     const currentSchedule = getCurrentDaySchedule(date, dayOfWeek);
     const currentTime = getCurrentTime(date);
