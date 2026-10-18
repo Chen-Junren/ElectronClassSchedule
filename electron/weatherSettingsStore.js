@@ -9,7 +9,7 @@ function normalizeWeatherSettings(value) {
 
     let apiHost = typeof value.apiHost === 'string' ? value.apiHost.trim() : '';
     if (['api.qweather.com', 'devapi.qweather.com', 'geoapi.qweather.com'].includes(apiHost.toLowerCase())) apiHost = '';
-    if (!/^[a-z0-9.-]+(?::\d{1,5})?$/i.test(apiHost) || apiHost.includes('..')) {
+    if (apiHost && (!/^[a-z0-9.-]+(?::\d{1,5})?$/i.test(apiHost) || apiHost.includes('..'))) {
         throw new TypeError('Invalid QWeather API host');
     }
 
