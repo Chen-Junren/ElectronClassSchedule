@@ -222,6 +222,10 @@
       showStatus('API Host 格式不正确，请只填写域名。', false);
       return;
     }
+    if (weatherEnabled.checked && !host) {
+      showStatus('启用天气数据获取前，请填写 QWeather 控制台分配的专用 API Host。', false);
+      return;
+    }
     if (weatherEnabled.checked && !selectedRegion) {
       showStatus('启用天气面板前，请先选择一个区县级地区。', false);
       return;
