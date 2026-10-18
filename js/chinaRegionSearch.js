@@ -9,7 +9,7 @@
 function normalize(value) {
     return String(value == null ? '' : value)
         .toLocaleLowerCase('zh-CN')
-        .replace(/[\\s,，、。·._-]/g, '')
+        .replace(/[\s,，、。·._-]/g, '')
         .replace(/特别行政区|维吾尔自治区|壮族自治区|回族自治区|自治区|自治州|自治县|自治旗|省|市|区|县|旗|盟|地区/g, '');
 }
 
@@ -22,7 +22,7 @@ function buildDistrictIndex(codeNameMap) {
     const regions = [];
 
     for (const [code, district] of names) {
-        if (!/^\\d{6}$/.test(code) || code.endsWith('0000') || code.endsWith('00')) continue;
+        if (!/^\d{6}$/.test(code) || code.endsWith('0000') || code.endsWith('00')) continue;
 
         const provinceCode = code.slice(0, 2) + '0000';
         const cityCode = code.slice(0, 4) + '00';
@@ -32,7 +32,7 @@ function buildDistrictIndex(codeNameMap) {
         // Some municipalities do not publish a separate city-level row in this dataset.
         // For these cases, use the municipality name as the city label as well.
         const city = names.get(cityCode) || province;
-        const label = `${code}-${province},${city},${district}`;
+        const label = code + '-' + province + ',' + city + ',' + district;
         regions.push({
             code,
             provinceCode,
@@ -58,8 +58,9 @@ function searchDistricts(regions, query, limit = 20) {
     const rawQuery = String(query == null ? '' : query).trim();
     if (!rawQuery) return [];
 
-    const terms = rawQuery.split(/[\\s,，、;；]+/).map(normalize).filter(Boolean);
+    const terms = rawQuery.split(/[\s,，、;；]+/).map(normalize).filter(Boolean);
     const compactQuery = normalize(rawQuery);
+    if (!compactQuery && terms.length === 0) return [];
     const matches = [];
 
     for (const region of regions) {
@@ -67,7 +68,7 @@ function searchDistricts(regions, query, limit = 20) {
         const searchable = region.searchText || normalize([
             code, region.province, region.city, region.district, region.label
         ].join(' '));
-        const allTermsMatch = terms.every(term => searchable.includes(term));
+        const allTermsMatch = terms.length > 0 && terms.every(term => searchable.includes(term));
         const compactMatch = compactQuery && searchable.includes(compactQuery);
         if (!allTermsMatch && !compactMatch) continue;
 
