@@ -97,7 +97,7 @@ test('getWeatherSnapshot logs request inputs and API response bodies without exp
 
         const snapshot = await getWeatherSnapshot(configuredSettings, { fetchImpl, logger });
         const output = fs.readFileSync(logPath, 'utf8');
-        const records = output.trim().split('\\n').map(line => JSON.parse(line));
+        const records = output.trim().split('\n').map(line => JSON.parse(line));
         const requests = records.filter(record => record.event === 'weather.api.request');
         const responses = records.filter(record => record.event === 'weather.api.response');
 
