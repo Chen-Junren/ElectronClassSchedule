@@ -28,7 +28,7 @@ function response(payload) {
 }
 
 test('makeUrl safely encodes location query values without putting credentials in the URL', () => {
-    const url = new URL(makeUrl('geoapi.qweather.com', '/v2/city/lookup', { location: '南山区,深圳市' }));
+    const url = new URL(makeUrl('example.qweatherapi.com', '/geo/v2/city/lookup', { location: '南山区,深圳市' }));
     assert.equal(url.searchParams.get('location'), '南山区,深圳市');
     assert.equal(url.searchParams.has('key'), false);
 });
@@ -82,6 +82,35 @@ test('getWeatherSnapshot rejects lookup results that do not match the selected r
         { id: '2', name: '南山区', adm1: '其他省', adm2: '其他市', lat: '22.5', lon: '113.9' }
     ] });
     await assert.rejects(() => getWeatherSnapshot(settings, { fetchImpl }), /could not resolve/);
+});
+
+test('getWeatherSnapshot rejects unexpected V1 response payloads instead of displaying blank data', async () => {
+    const configuredSettings = {
+        ...settings,
+        region: { ...region, qweatherLocationId: '101280604', latitude: 22.53, longitude: 113.93 }
+    };
+    const fetchImpl = async url => {
+        if (url.includes('/weather/v1/current/')) return response({ unexpected: true });
+        return response({ hours: [] });
+    };
+    await assert.rejects(() => getWeatherSnapshot(configuredSettings, { fetchImpl }), /Unexpected QWeather V1 response schema/);
+});
+
+test('getWeatherSnapshot sends the API key in the documented header', async () => {
+    const configuredSettings = {
+        ...settings,
+        region: { ...region, qweatherLocationId: '101280604', latitude: 22.53, longitude: 113.93 }
+    };
+    const calls = [];
+    const fetchImpl = async (url, options) => {
+        calls.push({ url, headers: options.headers });
+        if (url.includes('/weather/v1/current/')) return response({ condition: { text: '晴', code: '100' }, temperature: { value: 25, unit: '°C' } });
+        return response({ hours: [] });
+    };
+    await getWeatherSnapshot(configuredSettings, { fetchImpl });
+    assert.equal(calls.length, 2);
+    assert.equal(calls.every(call => call.headers['X-QW-Api-Key'] === 'test-key'), true);
+    assert.equal(calls.every(call => !call.url.includes('test-key')), true);
 });
 
 test('getWeatherSnapshot returns disabled when weather is not configured', async () => {
