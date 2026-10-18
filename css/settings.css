@@ -1,0 +1,56 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+  color: #202938;
+  background: #f4f6fa;
+  font-synthesis: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 760px; min-height: 100vh; background: #f4f6fa; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+.app-shell { min-height: 100vh; }
+.topbar { display: flex; align-items: center; gap: 14px; padding: 22px 30px; background: #fff; border-bottom: 1px solid #e4e8ef; }
+.brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: #263b63; color: #fff; font-size: 22px; font-weight: 700; }
+h1, h2, h3, p { margin: 0; }
+.topbar h1 { font-size: 21px; letter-spacing: .02em; }
+.topbar p { margin-top: 4px; color: #7b8494; font-size: 12px; }
+.layout { display: grid; grid-template-columns: 190px minmax(0, 1fr); min-height: calc(100vh - 87px); }
+.nav-list { padding: 24px 12px; border-right: 1px solid #e4e8ef; background: #fbfcfe; }
+.nav-item { display: block; width: 100%; padding: 12px 14px; margin-bottom: 5px; border: 0; border-radius: 9px; text-align: left; color: #5c6678; background: transparent; font-size: 13px; }
+.nav-item:hover { background: #edf1f7; }
+.nav-item.active { background: #e7edf8; color: #244578; font-weight: 700; }
+.content { max-width: 900px; width: 100%; padding: 28px 32px 38px; }
+.section-heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.section-heading h2 { font-size: 22px; }
+.section-heading p { margin-top: 8px; color: #778194; font-size: 13px; line-height: 1.6; }
+.panel { padding: 21px; margin-bottom: 16px; border: 1px solid #e5e9f0; border-radius: 13px; background: #fff; box-shadow: 0 4px 14px rgba(34, 49, 76, .035); }
+.field-label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 700; color: #344054; }
+input[type="search"], input[type="text"], input[type="password"] { display: block; width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid #d5dce7; border-radius: 8px; background: #fff; color: #202938; outline: none; }
+input:focus { border-color: #6685bb; box-shadow: 0 0 0 3px rgba(73, 111, 173, .12); }
+.hint { color: #8992a2; font-size: 12px; line-height: 1.55; }
+input + .hint { margin-top: 7px; margin-bottom: 16px; }
+.region-results { display: flex; flex-direction: column; gap: 5px; max-height: 220px; overflow-y: auto; margin-top: 12px; }
+.region-option { width: 100%; padding: 10px 12px; border: 1px solid transparent; border-radius: 8px; background: #f7f9fc; text-align: left; white-space: normal; color: #293548; font-size: 12px; line-height: 1.5; }
+.region-option:hover, .region-option:focus { border-color: #9bb0d2; background: #eef3fb; outline: none; }
+.region-option strong { display: block; margin-bottom: 2px; font-size: 13px; }
+.empty-state { padding: 12px; color: #929aaa; font-size: 12px; white-space: normal; }
+.selected-region { display: flex; flex-direction: column; gap: 6px; margin-top: 15px; padding: 12px 14px; border-left: 3px solid #526f9f; border-radius: 6px; background: #f3f6fb; white-space: normal; }
+.selected-label { color: #7b8494; font-size: 11px; }
+.selected-region strong { font-size: 13px; white-space: normal; overflow-wrap: anywhere; }
+.panel-title-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 18px; }
+.panel-title-row h3, .future-panel h3 { margin-bottom: 6px; font-size: 15px; }
+.toggle { display: flex; flex-shrink: 0; align-items: center; gap: 7px; color: #465267; font-size: 12px; }
+.toggle input { accent-color: #345b91; }
+#qweatherKey { margin-bottom: 2px; }
+.notice { min-height: 20px; margin: 4px 0 12px; color: #a64b35; font-size: 12px; white-space: normal; }
+.notice.success { color: #28784e; }
+.actions { display: flex; justify-content: flex-end; gap: 9px; }
+.primary-button, .secondary-button { padding: 10px 17px; border-radius: 8px; font-size: 13px; font-weight: 700; }
+.primary-button { border: 1px solid #294c7f; color: #fff; background: #294c7f; }
+.primary-button:hover { background: #203e6a; }
+.secondary-button { border: 1px solid #d5dce7; color: #566175; background: #fff; }
+.secondary-button:hover { background: #f5f7fa; }
+.future-panel { min-height: 150px; color: #6e7889; }
+.future-panel p { max-width: 520px; font-size: 13px; line-height: 1.8; white-space: normal; }
+.hidden { display: none; }
