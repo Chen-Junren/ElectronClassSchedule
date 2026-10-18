@@ -56,3 +56,8 @@
 * 可以用来盈利 你可以在分发软件的时候收费，但你必须在收费前向你的客户提供该软件的 GNU GPL 许可协议，以便让他们知道，他们可以从别的渠道免费得到这份软件，以及你收费的理由。
 * 可自由修改 如果你想添加或删除某个功能，没问题，如果你想在别的项目中使用部分代码，也没问题，唯一的要求是，使用了这段代码的项目也必须使用 GPL 协议。
 * 如果有人和接收者签了合同性质的东西，并提供责任承诺，则授权人和作者不受此责任连带。
+
+
+## Weather icons
+
+The weather panel uses the official [QWeather Icons](https://icons.qweather.com/) icon font and maps icon classes to the icon codes returned by the QWeather API. The icon stylesheet is loaded from jsDelivr, so displaying icons requires network access. QWeather Icons source code is MIT-licensed; icon designs are licensed under CC BY 4.0. See the [installation](https://icons.qweather.com/install/) and [usage](https://icons.qweather.com/usage/) documentation.
