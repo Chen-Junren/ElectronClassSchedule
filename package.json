@@ -9,7 +9,7 @@
     "start": "electron .",
     "build": "electron-packager . classSchedule --platform=win32 --arch=x64 --out=./out --app-version=0.0.1 --overwrite",
     "test": "node --test",
-    "check": "node --check main.js && node --check preload.js && node --check js/index.js && node --check js/renderer.js && node --check js/scheduleEngine.js && node --check js/scheduleConfigStore.js && node --check js/appStateStore.js && node --check js/chinaRegionSearch.js && node --check js/settings.js && node --check electron/weatherSettingsStore.js && node --check electron/qweatherClient.js && node --check electron/autoLaunch.js && node --check electron/registerIpcHandlers.js && node --check electron/registerTray.js"
+    "check": "node --check main.js && node --check preload.js && node --check js/index.js && node --check js/renderer.js && node --check js/scheduleEngine.js && node --check js/scheduleConfigStore.js && node --check js/appStateStore.js && node --check js/chinaRegionSearch.js && node --check js/settings.js && node --check electron/dateOverrideStore.js && node --check electron/weatherSettingsStore.js && node --check electron/qweatherClient.js && node --check electron/autoLaunch.js && node --check electron/registerIpcHandlers.js && node --check electron/registerTray.js"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.6.0",
