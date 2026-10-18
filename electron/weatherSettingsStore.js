@@ -13,7 +13,7 @@ function normalizeWeatherSettings(value) {
     }
 
     const geoApiHost = typeof value.geoApiHost === 'string' ? value.geoApiHost.trim() : 'geoapi.qweather.com';
-    if (!/^[a-z0-9.-]+(?::\\d{1,5})?$/i.test(geoApiHost) || geoApiHost.includes('..')) {
+    if (!/^[a-z0-9.-]+(?::\d{1,5})?$/i.test(geoApiHost) || geoApiHost.includes('..')) {
         throw new TypeError('Invalid QWeather Geo API host');
     }
 
