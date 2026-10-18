@@ -9,6 +9,15 @@
   const qweatherGeoHost = document.getElementById('qweatherGeoHost');
   const qweatherKey = document.getElementById('qweatherKey');
   const statusMessage = document.getElementById('statusMessage');
+  const dateOverrideForm = document.getElementById('dateOverrideForm');
+  const dateOverrideList = document.getElementById('dateOverrideList');
+  const overrideDate = document.getElementById('overrideDate');
+  const overrideType = document.getElementById('overrideType');
+  const overrideWeekday = document.getElementById('overrideWeekday');
+  const overrideWeekdayField = document.getElementById('overrideWeekdayField');
+  const overrideNote = document.getElementById('overrideNote');
+  const calendarStatus = document.getElementById('calendarStatus');
+  let dateOverrides = [];
   let regions = [];
   let selectedRegion = null;
   let savedSettings = {};
@@ -103,6 +112,88 @@
   }
 
   document.getElementById('resetDaySchedule').addEventListener('click', () => applyScheduleDay(7));
+
+  function showCalendarStatus(message, success = false) {
+    calendarStatus.textContent = message;
+    calendarStatus.className = success ? 'notice success' : 'notice';
+  }
+
+  function updateOverrideTypeFields() {
+    overrideWeekdayField.classList.toggle('hidden', overrideType.value !== 'classDay');
+  }
+
+  function renderDateOverrides() {
+    dateOverrideList.replaceChildren();
+    if (!dateOverrides.length) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = '尚未设置特殊日期。';
+      dateOverrideList.appendChild(empty);
+      return;
+    }
+    for (const item of dateOverrides) {
+      const row = document.createElement('div');
+      row.className = 'date-override-row';
+      const info = document.createElement('div');
+      info.className = 'date-override-info';
+      const title = document.createElement('strong');
+      title.textContent = item.date + ' · ' + (item.type === 'holiday' ? '放假 / 无课' : '补课 / 调课（星期' + ['日','一','二','三','四','五','六'][item.dayOfWeek] + '课表）');
+      const note = document.createElement('span');
+      note.textContent = item.note || '无备注';
+      info.append(title, note);
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'secondary-button';
+      remove.textContent = '删除';
+      remove.addEventListener('click', () => removeDateOverride(item.date));
+      row.append(info, remove);
+      dateOverrideList.appendChild(row);
+    }
+  }
+
+  async function loadDateOverrides() {
+    try {
+      dateOverrides = await window.electronAPI.getDateOverrides();
+      renderDateOverrides();
+    } catch (error) {
+      dateOverrideList.textContent = '读取日期安排失败：' + (error.message || '未知错误');
+    }
+  }
+
+  async function persistDateOverrides(nextOverrides, successMessage) {
+    try {
+      dateOverrides = await window.electronAPI.saveDateOverrides(nextOverrides);
+      renderDateOverrides();
+      showCalendarStatus(successMessage, true);
+    } catch (error) {
+      showCalendarStatus('保存失败：' + (error.message || '日期安排无效'), false);
+    }
+  }
+
+  async function removeDateOverride(date) {
+    await persistDateOverrides(dateOverrides.filter(item => item.date !== date), '已删除 ' + date + ' 的特殊安排。');
+  }
+
+  overrideType.addEventListener('change', updateOverrideTypeFields);
+  dateOverrideForm.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (!overrideDate.value) {
+      showCalendarStatus('请先选择日期。');
+      return;
+    }
+    const entry = {
+      date: overrideDate.value,
+      type: overrideType.value,
+      dayOfWeek: overrideType.value === 'classDay' ? Number(overrideWeekday.value) : null,
+      note: overrideNote.value.trim()
+    };
+    const nextOverrides = dateOverrides.filter(item => item.date !== entry.date);
+    nextOverrides.push(entry);
+    await persistDateOverrides(nextOverrides, '已保存 ' + entry.date + ' 的特殊安排。');
+    overrideNote.value = '';
+  });
+  updateOverrideTypeFields();
+  loadDateOverrides();
 
   searchInput.addEventListener('input', () => renderResults(searchInput.value));
   document.getElementById('resetSearch').addEventListener('click', () => {
