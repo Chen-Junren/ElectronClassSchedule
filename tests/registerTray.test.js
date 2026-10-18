@@ -116,7 +116,7 @@ test('tray configuration menu opens the unified settings window', () => {
     harness.makeWindow();
     harness.manager.registerWeekMenuHandler({ on: (channel, callback) => harness.handlers.set(channel, callback) });
     harness.handlers.get('getWeekIndex')({}, 0);
-    findItem(harness.template, '配置课表与外观').click();
+    findItem(harness.template, '课表与外观设置').click();
     assert.equal(harness.settingsOpenCount, 1);
 });
 
