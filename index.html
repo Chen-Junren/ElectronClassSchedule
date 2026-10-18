@@ -13,6 +13,7 @@
   <script type="text/javascript" src="js/appStateStore.js"></script>
   <script type="text/javascript" src="js/index.js"></script>
   <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link id="qweatherIconStylesheet" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/qweather-icons@1.8.0/font/qweather-icons.css">
 </head>
 
 <body>
@@ -36,14 +37,14 @@
   <section class="weatherPanel" id="weatherPanel" aria-live="polite" aria-label="天气信息">
     <div class="weatherRegion" id="weatherRegion">天气</div>
     <div class="weatherCurrentRow">
-      <img class="weatherIcon" id="weatherIcon" alt="">
+      <i class="weatherIcon" id="weatherIcon" role="img" aria-label="天气图标"></i>
       <div class="weatherCurrent" id="weatherCurrent">--°</div>
     </div>
     <div class="weatherDescription" id="weatherDescription">等待天气数据</div>
     <div class="weatherDivider"></div>
     <div class="weatherNextTitle">未来一小时</div>
     <div class="weatherNextRow">
-      <img class="weatherNextIcon" id="weatherNextIcon" alt="" aria-hidden="true">
+      <i class="weatherNextIcon" id="weatherNextIcon" aria-hidden="true"></i>
       <div class="weatherNextHour" id="weatherNextHour">--</div>
     </div>
   </section>
