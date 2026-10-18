@@ -147,12 +147,6 @@ async function resolveCoordinates(settings, options, logger) {
     throw new Error('QWeather could not resolve coordinates for the selected district. Check the region and API Host.');
 }
 
-function numericValue(value) {
-    if (value == null || value === '') return null;
-    const number = Number(value);
-    return Number.isFinite(number) ? number : null;
-}
-
 function stringValue(value) {
     return value == null ? null : String(value);
 }
@@ -191,8 +185,17 @@ async function getWeatherSnapshot(settings, options = {}) {
         requestJson(fetchImpl, makeUrl(settings.apiHost, '/weather/v1/hourly/' + lat + '/' + lon, { hours: 2, lang: 'zh', localTime: 'true' }), logger, settings.apiKey)
     ]);
 
-    const hours = Array.isArray(hourlyPayload.hours) ? hourlyPayload.hours : [];
-    const nextHour = hours[0] || null;
+    if (!nowPayload.condition || typeof nowPayload.condition !== 'object'
+        || !nowPayload.temperature || typeof nowPayload.temperature !== 'object'
+        || !Array.isArray(hourlyPayload.hours)) {
+        throw new Error('Unexpected QWeather V1 response schema');
+    }
+    const hours = hourlyPayload.hours;
+    const currentTime = Date.now();
+    const nextHour = hours.find(item => {
+        const timestamp = Date.parse(item && item.forecastTime || '');
+        return Number.isFinite(timestamp) && timestamp > currentTime;
+    }) || hours[0] || null;
     const nowCondition = nowPayload.condition || {};
     const nowTemperature = nowPayload.temperature || {};
     const nextCondition = nextHour && nextHour.condition || {};
