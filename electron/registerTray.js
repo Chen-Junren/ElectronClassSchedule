@@ -43,18 +43,15 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 writeLog('info', 'user.schedule_week_selected', { weekIndex });
                 sendToWindow('setWeekIndex', weekIndex);
             };
-            const weekMenu = [
+            const menuItems = [
                 { label: '第一周', type: 'radio', click: () => selectWeek(0) },
                 { label: '第二周', type: 'radio', click: () => selectWeek(1) },
                 { label: '第三周', type: 'radio', click: () => selectWeek(2) },
-                { label: '第四周', type: 'radio', click: () => selectWeek(3) }
-            ];
-
-            const settingsAndTools = [
+                { label: '第四周', type: 'radio', click: () => selectWeek(3) },
+                { type: 'separator' },
                 {
                     icon: getBasePath() + 'image/setting.png',
-                    label: '配置课表与外观',
-                    sublabel: '课程、天气、主题和配色',
+                    label: '课表与外观设置',
                     click: () => {
                         writeLog('info', 'user.settings_menu_selected', { source: 'tray' });
                         if (typeof openSettingsWindow === 'function') openSettingsWindow();
@@ -64,17 +61,13 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 {
                     icon: getBasePath() + 'image/clock.png',
                     label: '矫正计时',
-                    sublabel: '修正课表与系统时间的偏差',
                     click: () => {
                         writeLog('info', 'user.time_offset_menu_selected');
                         sendToWindow('getTimeOffset');
                     }
-                }
-            ];
-
-            const windowBehavior = [
+                },
+                { type: 'separator' },
                 {
-                    id: 'countdown',
                     label: '课上计时',
                     type: 'checkbox',
                     checked: store.get('isDuringClassCountdown', true),
@@ -82,6 +75,16 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                         writeLog('info', 'user.countdown_display_toggled', { enabled: event.checked });
                         store.set('isDuringClassCountdown', event.checked);
                         sendToWindow('ClassCountdown', event.checked);
+                    }
+                },
+                {
+                    label: '上课隐藏',
+                    type: 'checkbox',
+                    checked: store.get('isDuringClassHidden', true),
+                    click: (event) => {
+                        writeLog('info', 'user.class_window_hidden_toggled', { enabled: event.checked });
+                        store.set('isDuringClassHidden', event.checked);
+                        sendToWindow('ClassHidden', event.checked);
                     }
                 },
                 {
@@ -100,19 +103,6 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                         }
                     }
                 },
-                {
-                    label: '上课隐藏',
-                    type: 'checkbox',
-                    checked: store.get('isDuringClassHidden', true),
-                    click: (event) => {
-                        writeLog('info', 'user.class_window_hidden_toggled', { enabled: event.checked });
-                        store.set('isDuringClassHidden', event.checked);
-                        sendToWindow('ClassHidden', event.checked);
-                    }
-                }
-            ];
-
-            const startupAndExit = [
                 {
                     label: '开机启动',
                     type: 'checkbox',
@@ -152,19 +142,11 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
 
             const selectedWeek = Number(arg);
             if (Number.isInteger(selectedWeek) && selectedWeek >= 0 && selectedWeek <= 3) {
-                weekMenu[selectedWeek].checked = true;
+                menuItems[selectedWeek].checked = true;
             }
 
-            const template = [
-                { label: '四周循环', submenu: weekMenu },
-                { type: 'separator' },
-                { label: '设置与工具', submenu: settingsAndTools },
-                { type: 'separator' },
-                { label: '窗口行为', submenu: windowBehavior },
-                { label: '启动与退出', submenu: startupAndExit }
-            ];
-
-            form = menuApi.buildFromTemplate(template);
+            // Keep every actionable item on one level to avoid redundant nested menus.
+            form = menuApi.buildFromTemplate(menuItems);
             tray.setContextMenu(form);
 
             sendToWindow('ClassCountdown', store.get('isDuringClassCountdown', true));
