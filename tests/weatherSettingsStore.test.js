@@ -23,27 +23,28 @@ const validRegion = {
 test('weather settings normalize defaults and persist through the store', () => {
     const store = createStore();
     assert.deepEqual(loadWeatherSettings(store), {
-        enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: null
+        enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: null
     });
     const saved = saveWeatherSettings(store, {
-        enabled: true, apiHost: 'api.qweather.com', apiKey: 'local-test-key', region: validRegion
+        enabled: true, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: 'local-test-key', region: validRegion
     });
     assert.equal(saved.region.adminCode, '440305');
     assert.equal(loadWeatherSettings(store).apiKey, 'local-test-key');
 });
 
 test('weather settings reject enabled state without region or key', () => {
-    assert.throws(() => normalizeWeatherSettings({ enabled: true, apiHost: 'api.qweather.com', apiKey: '', region: null }), TypeError);
+    assert.throws(() => normalizeWeatherSettings({ enabled: true, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: null }), TypeError);
 });
 
 test('weather settings reject malformed host, region code, and QWeather ID', () => {
-    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'https://api.qweather.com/path', apiKey: '', region: null }), TypeError);
-    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: { ...validRegion, adminCode: 'abc' } }), TypeError);
-    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: { ...validRegion, qweatherLocationId: 'bad id' } }), TypeError);
+    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'https://api.qweather.com/path', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: null }), TypeError);
+    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'https://geoapi.qweather.com/path', apiKey: '', region: null }), TypeError);
+    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: { ...validRegion, adminCode: 'abc' } }), TypeError);
+    assert.throws(() => normalizeWeatherSettings({ enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: { ...validRegion, qweatherLocationId: 'bad id' } }), TypeError);
 });
 
 test('invalid stored weather settings safely fall back to defaults', () => {
-    const store = createStore({ enabled: true, apiHost: 'https://invalid', apiKey: 'x', region: null });
+    const store = createStore({ enabled: true, apiHost: 'https://invalid', geoApiHost: 'geoapi.qweather.com', apiKey: 'x', region: null });
     assert.deepEqual(loadWeatherSettings(store), {
         enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: null
     });
