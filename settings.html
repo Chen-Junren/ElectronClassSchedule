@@ -107,8 +107,41 @@
           <div class="panel future-panel"><h3>下一步</h3><p>在设置窗口中编辑每日课程、课程时间、科目名称和单双周安排，同时保留现有顶部悬浮条。</p></div>
         </section>
         <section class="settings-section hidden" data-panel="calendar">
-          <div class="section-heading"><div><h2>学期与调课</h2><p>管理学期周数、节假日和补课日。</p></div></div>
-          <div class="panel future-panel"><h3>下一步</h3><p>支持按日期覆盖当天课表，配置放假、调休、补课及临时换课，并让手动调整优先于常规周历。</p></div>
+          <div class="section-heading">
+            <div><h2>学期与调课</h2><p>为具体日期设置放假或补课安排；日期规则优先于常规星期课表。</p></div>
+          </div>
+          <form id="dateOverrideForm" class="panel calendar-form">
+            <div class="calendar-grid">
+              <div>
+                <label class="field-label" for="overrideDate">日期</label>
+                <input id="overrideDate" type="date" required>
+              </div>
+              <div>
+                <label class="field-label" for="overrideType">安排类型</label>
+                <select id="overrideType">
+                  <option value="holiday">放假 / 无课</option>
+                  <option value="classDay">补课 / 调课</option>
+                </select>
+              </div>
+              <div id="overrideWeekdayField" class="hidden">
+                <label class="field-label" for="overrideWeekday">使用哪一天的课表</label>
+                <select id="overrideWeekday">
+                  <option value="1">星期一</option><option value="2">星期二</option>
+                  <option value="3">星期三</option><option value="4">星期四</option>
+                  <option value="5">星期五</option><option value="6">星期六</option>
+                  <option value="0">星期日</option>
+                </select>
+              </div>
+            </div>
+            <label class="field-label" for="overrideNote">备注（可选）</label>
+            <input id="overrideNote" type="text" maxlength="100" placeholder="例如：国庆节调休、周六补周一的课">
+            <div id="calendarStatus" class="notice" role="status" aria-live="polite"></div>
+            <div class="actions"><button class="primary-button" type="submit">保存日期安排</button></div>
+          </form>
+          <div class="panel">
+            <div class="panel-title-row"><h3>已设置的日期</h3><span class="hint">可随时修改或删除</span></div>
+            <div id="dateOverrideList" class="date-override-list"><p class="empty-state">正在载入日期安排…</p></div>
+          </div>
         </section>
         <section class="settings-section hidden" data-panel="appearance">
           <div class="section-heading"><div><h2>外观与主题</h2><p>让悬浮课表更贴合你的桌面。</p></div></div>
@@ -122,6 +155,7 @@
     </div>
   </main>
   <script src="js/chinaRegionSearch.js"></script>
+  <script src="js/appStateStore.js"></script>
   <script src="js/settings.js"></script>
 </body>
 </html>
