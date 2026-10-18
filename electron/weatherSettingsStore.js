@@ -7,7 +7,8 @@ function normalizeWeatherSettings(value) {
         throw new TypeError('Weather settings must be an object');
     }
 
-    const apiHost = typeof value.apiHost === 'string' ? value.apiHost.trim() : 'api.qweather.com';
+    let apiHost = typeof value.apiHost === 'string' ? value.apiHost.trim() : '';
+    if (['api.qweather.com', 'devapi.qweather.com', 'geoapi.qweather.com'].includes(apiHost.toLowerCase())) apiHost = '';
     if (!/^[a-z0-9.-]+(?::\d{1,5})?$/i.test(apiHost) || apiHost.includes('..')) {
         throw new TypeError('Invalid QWeather API host');
     }
@@ -60,7 +61,7 @@ function normalizeWeatherSettings(value) {
 function loadWeatherSettings(store) {
     const saved = store.get(STORE_KEY, null);
     if (!saved) {
-        return { enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: null };
+        return { enabled: false, apiHost: '', apiKey: '', region: null };
     }
     try {
         return normalizeWeatherSettings(saved);
