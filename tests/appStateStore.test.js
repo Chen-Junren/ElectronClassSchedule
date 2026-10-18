@@ -93,3 +93,19 @@ test('loadState tolerates storage access errors', () => {
         setDayOffsetLastDay: -1
     });
 });
+
+
+test('date keys use local calendar dates and date overrides match exact dates', () => {
+    const date = new Date(2026, 9, 18, 23, 30);
+    assert.equal(AppStateStore.getDateKey(date), '2026-10-18');
+    const overrides = [
+        { date: '2026-10-18', type: 'holiday' },
+        { date: '2026-10-19', type: 'classDay', dayOfWeek: 1 }
+    ];
+    assert.deepEqual(AppStateStore.findDateOverride(date, overrides), overrides[0]);
+    assert.equal(AppStateStore.findDateOverride(new Date(2026, 9, 20), overrides), null);
+});
+
+test('getDateKey rejects invalid dates', () => {
+    assert.throws(() => AppStateStore.getDateKey(new Date('invalid')), TypeError);
+});
