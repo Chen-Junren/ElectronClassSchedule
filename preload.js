@@ -33,6 +33,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     saveWeatherSettings(settings) {
         return ipcRenderer.invoke('saveWeatherSettings', settings);
     },
+    setScheduleDay(day) {
+        return ipcRenderer.invoke('setScheduleDay', day);
+    },
     getWeatherSnapshot() {
         return ipcRenderer.invoke('getWeatherSnapshot');
     },
