@@ -81,6 +81,29 @@
     }
   }
 
+  document.querySelectorAll('.day-choice').forEach(button => {
+    button.addEventListener('click', async () => {
+      const day = Number(button.dataset.day);
+      await applyScheduleDay(day);
+    });
+  });
+
+  async function applyScheduleDay(day) {
+    const scheduleStatus = document.getElementById('scheduleStatus');
+    try {
+      await window.electronAPI.setScheduleDay(day);
+      scheduleStatus.textContent = day <= 6
+        ? '已切换为星期' + ['日', '一', '二', '三', '四', '五', '六'][day] + '的课表。'
+        : '已恢复按当前日期自动使用课表。';
+      scheduleStatus.className = 'notice success';
+    } catch (error) {
+      scheduleStatus.textContent = '切换失败：' + (error.message || '无法连接课表窗口');
+      scheduleStatus.className = 'notice';
+    }
+  }
+
+  document.getElementById('resetDaySchedule').addEventListener('click', () => applyScheduleDay(7));
+
   searchInput.addEventListener('input', () => renderResults(searchInput.value));
   document.getElementById('resetSearch').addEventListener('click', () => {
     searchInput.value = '';
