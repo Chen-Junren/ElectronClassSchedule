@@ -86,6 +86,23 @@
         return { dayOffset: DEFAULTS.dayOffset, setDayOffsetLastDay: DEFAULTS.setDayOffsetLastDay };
     }
 
+    function getDateKey(date) {
+        if (!(date instanceof Date) || Number.isNaN(date.getTime())) {
+            throw new TypeError('Expected a valid Date');
+        }
+        return [
+            date.getFullYear(),
+            String(date.getMonth() + 1).padStart(2, '0'),
+            String(date.getDate()).padStart(2, '0')
+        ].join('-');
+    }
+
+    function findDateOverride(date, overrides) {
+        if (!Array.isArray(overrides)) return null;
+        const key = getDateKey(date);
+        return overrides.find(item => item && item.date === key) || null;
+    }
+
     function getEffectiveDay(storage, date, actualToday = new Date().getDay()) {
         const state = loadState(storage);
         if (state.dayOffset === DEFAULTS.dayOffset) return date.getDay();
@@ -102,6 +119,8 @@
         setTimeOffset,
         setDayOffset,
         resetDayOffset,
+        getDateKey,
+        findDateOverride,
         getEffectiveDay
     };
 }));
