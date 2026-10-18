@@ -346,6 +346,15 @@
     setDayOffsetLastDay = state.setDayOffsetLastDay
   })
 
+  ipcRenderer.on('applyScheduleDay', (_event, day) => {
+    if (!Number.isInteger(day) || day < 0 || day > 7) return
+    const state = day <= 6
+      ? AppStateStore.setDayOffset(localStorage, day, new Date().getDay())
+      : AppStateStore.resetDayOffset(localStorage)
+    dayOffset = state.dayOffset
+    setDayOffsetLastDay = state.setDayOffsetLastDay
+  })
+
 
   ipcRenderer.on('weatherSettingsChanged', () => refreshWeather())
   window.addEventListener('resize', positionWeatherPanel)
