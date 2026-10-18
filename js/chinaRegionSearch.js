@@ -93,4 +93,10 @@ function searchDistricts(regions, query, limit = 20) {
     }));
 }
 
-module.exports = { normalize, buildDistrictIndex, searchDistricts };
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { normalize, buildDistrictIndex, searchDistricts };
+}
+
+if (typeof window !== 'undefined') {
+    window.ChinaRegionSearch = { normalize, buildDistrictIndex, searchDistricts };
+}
