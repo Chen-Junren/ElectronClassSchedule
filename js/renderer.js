@@ -192,7 +192,8 @@
     if (!weatherPanel || weatherPanel.style.display === 'none' || getComputedStyle(weatherPanel).display === 'none') return;
     const anchor = rightSidebar.style.display !== 'none' ? rightSidebar : classContainer;
     const anchorRect = anchor.getBoundingClientRect();
-    const panelWidth = weatherPanel.offsetWidth || 360;
+    const panelWidth = weatherPanel.offsetWidth || 420;
+    weatherPanel.style.height = Math.max(0, anchorRect.height) + 'px';
     let left = anchorRect.right + 12;
     if (left + panelWidth > window.innerWidth - 12) {
       left = globalContainer.getBoundingClientRect().left - panelWidth - 12;
