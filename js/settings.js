@@ -91,7 +91,7 @@
         selectedRegion = savedSettings.region;
       }
       weatherEnabled.checked = savedSettings.enabled === true;
-      qweatherHost.value = typeof savedSettings.apiHost === 'string' ? savedSettings.apiHost : 'api.qweather.com';
+      qweatherHost.value = typeof savedSettings.apiHost === 'string' ? savedSettings.apiHost : '';
       qweatherKey.value = typeof savedSettings.apiKey === 'string' ? savedSettings.apiKey : '';
       renderSelectedRegion();
       renderResults('');
