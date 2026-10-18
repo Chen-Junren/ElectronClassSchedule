@@ -36,19 +36,23 @@
   </div>
   <div class="miniCountdown" id="miniCountdown">00:00</div>
   <section class="weatherPanel" id="weatherPanel" aria-live="polite" aria-label="天气信息">
-    <div class="weatherRegion" id="weatherRegion">天气</div>
-    <div class="weatherCurrentRow">
-      <i class="weatherIcon" id="weatherIcon" role="img" aria-label="天气图标"></i>
-      <div class="weatherCurrent" id="weatherCurrent">--°</div>
+    <div class="weatherColumns">
+      <div class="weatherColumn weatherCurrentColumn">
+        <div class="weatherColumnTitle">当前天气</div>
+        <div class="weatherCurrentRow">
+          <i class="weatherIcon" id="weatherIcon" role="img" aria-label="天气图标"></i>
+          <div class="weatherCurrent" id="weatherCurrent">--°</div>
+        </div>
+        <div class="weatherDescription" id="weatherDescription">等待天气数据</div>
+      </div>
+      <div class="weatherColumn weatherNextColumn">
+        <div class="weatherColumnTitle">未来一小时</div>
+        <div class="weatherNextRow">
+          <i class="weatherNextIcon" id="weatherNextIcon" aria-hidden="true"></i>
+          <div class="weatherNextHour" id="weatherNextHour">--</div>
+        </div>
+      </div>
     </div>
-    <div class="weatherDescription" id="weatherDescription">等待天气数据</div>
-    <div class="weatherDivider"></div>
-    <div class="weatherNextTitle">未来一小时</div>
-    <div class="weatherNextRow">
-      <i class="weatherNextIcon" id="weatherNextIcon" aria-hidden="true"></i>
-      <div class="weatherNextHour" id="weatherNextHour">--</div>
-    </div>
-    <div class="weatherAttribution"><a href="https://developer.qweather.com/attribution.html" target="_blank" rel="noreferrer">天气数据来源：和风天气</a></div>
   </section>
 
 </body>
