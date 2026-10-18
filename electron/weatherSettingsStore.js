@@ -12,6 +12,11 @@ function normalizeWeatherSettings(value) {
         throw new TypeError('Invalid QWeather API host');
     }
 
+    const geoApiHost = typeof value.geoApiHost === 'string' ? value.geoApiHost.trim() : 'geoapi.qweather.com';
+    if (!/^[a-z0-9.-]+(?::\\d{1,5})?$/i.test(geoApiHost) || geoApiHost.includes('..')) {
+        throw new TypeError('Invalid QWeather Geo API host');
+    }
+
     const apiKey = typeof value.apiKey === 'string' ? value.apiKey.trim() : '';
     if (apiKey.length > 512) throw new RangeError('QWeather API key is too long');
 
@@ -45,13 +50,13 @@ function normalizeWeatherSettings(value) {
         throw new TypeError('Weather panel requires a selected region and API key');
     }
 
-    return { enabled, apiHost, apiKey, region };
+    return { enabled, apiHost, geoApiHost, apiKey, region };
 }
 
 function loadWeatherSettings(store) {
     const saved = store.get(STORE_KEY, null);
     if (!saved) {
-        return { enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: null };
+        return { enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: null };
     }
     try {
         return normalizeWeatherSettings(saved);
