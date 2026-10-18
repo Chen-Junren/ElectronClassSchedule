@@ -9,6 +9,7 @@ function createHarness() {
     let currentWindow = null;
     let trayInstance;
     let menuTemplate;
+    let settingsOpenCount = 0;
 
     class FakeTray {
         constructor(iconPath) {
@@ -50,6 +51,7 @@ function createHarness() {
         store,
         getBasePath: () => '/app/',
         setAutoLaunch() {},
+        openSettingsWindow() { settingsOpenCount += 1; },
         Menu: menuApi,
         Tray: FakeTray,
         shell: { openExternal() {} }
@@ -71,6 +73,7 @@ function createHarness() {
         handlers, sent, windows, makeWindow, manager,
         get tray() { return trayInstance; },
         get template() { return menuTemplate; },
+        get settingsOpenCount() { return settingsOpenCount; },
         get currentWindow() { return currentWindow; }
     };
 }
@@ -116,4 +119,14 @@ test('tray handler ignores invalid week selection and missing windows', () => {
     harness.makeWindow();
     harness.handlers.get('getWeekIndex')({}, 99);
     assert.equal(harness.template.slice(0, 4).some(item => item.checked === true), false);
+});
+
+
+test('tray configuration menu opens the unified settings window', () => {
+    const harness = createHarness();
+    harness.makeWindow();
+    harness.manager.registerWeekMenuHandler({ on: (channel, callback) => harness.handlers.set(channel, callback) });
+    harness.handlers.get('getWeekIndex')({}, 0);
+    harness.template[5].click();
+    assert.equal(harness.settingsOpenCount, 1);
 });
