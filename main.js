@@ -99,6 +99,16 @@ const hasSingleInstanceLock = app.requestSingleInstanceLock({ key: 'classSchedul
 if (!hasSingleInstanceLock) {
     app.quit();
 } else {
+    ipcMain.handle('setScheduleDay', (_event, day) => {
+        if (!Number.isInteger(day) || day < 0 || day > 7) {
+            throw new TypeError('Invalid schedule day');
+        }
+        if (!win || win.isDestroyed()) {
+            throw new Error('课表窗口尚未准备好');
+        }
+        win.webContents.send('applyScheduleDay', day);
+        return { ok: true };
+    });
     ipcMain.handle('getChinaDistrictCodes', () => require('./data/china-district-codes.json'));
     ipcMain.handle('getWeatherSettings', () => loadWeatherSettings(store));
     ipcMain.handle('saveWeatherSettings', (_event, value) => {
