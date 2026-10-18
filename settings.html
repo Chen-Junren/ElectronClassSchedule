@@ -144,8 +144,54 @@
           </div>
         </section>
         <section class="settings-section hidden" data-panel="appearance">
-          <div class="section-heading"><div><h2>外观与主题</h2><p>让悬浮课表更贴合你的桌面。</p></div></div>
-          <div class="panel future-panel"><h3>下一步</h3><p>后续加入颜色、透明度、间距和主题预设，并考虑按时间自动切换。</p></div>
+          <div class="section-heading">
+            <div>
+              <h2>外观与主题</h2>
+              <p>设置窗口与顶部悬浮栏分别配色。默认配色会保留现有悬浮栏风格。</p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="appearance-panel-heading">
+              <div><h3>界面背景</h3><p class="hint">设置窗口默认采用浅灰白；悬浮栏背景默认保留半透明黑色效果。</p></div>
+            </div>
+            <div class="color-grid">
+              <label class="color-setting" for="appearanceSettingsBackground">
+                <span><strong>设置窗口背景</strong><small>纯白或浅灰白</small></span>
+                <input id="appearanceSettingsBackground" type="color" value="#f4f6fa">
+              </label>
+              <label class="color-setting" for="appearanceBarBackground">
+                <span><strong>悬浮栏背景</strong><small>保留原有透明度</small></span>
+                <input id="appearanceBarBackground" type="color" value="#000000">
+              </label>
+            </div>
+          </div>
+          <div class="panel">
+            <h3 class="appearance-group-title">悬浮栏文字</h3>
+            <div class="color-grid">
+              <label class="color-setting" for="appearanceClassText"><span><strong>普通课程文字</strong><small>课程列表中的普通课程</small></span><input id="appearanceClassText" type="color" value="#ffffff"></label>
+              <label class="color-setting" for="appearanceHighlightText"><span><strong>当前 / 即将开始课程</strong><small>课程列表高亮色</small></span><input id="appearanceHighlightText" type="color" value="#00ff0a"></label>
+              <label class="color-setting" for="appearanceCountdownClassText"><span><strong>倒计时课程名称</strong><small>倒计时卡片中的课程名</small></span><input id="appearanceCountdownClassText" type="color" value="#00ff0a"></label>
+              <label class="color-setting" for="appearanceCountdownText"><span><strong>倒计时数字</strong><small>剩余时间文字</small></span><input id="appearanceCountdownText" type="color" value="#ffffff"></label>
+              <label class="color-setting" for="appearanceLeftSidebarText"><span><strong>左侧星期信息</strong><small>英文与中文星期</small></span><input id="appearanceLeftSidebarText" type="color" value="#00eeff"></label>
+              <label class="color-setting" for="appearanceRightSidebarText"><span><strong>右侧日期倒数</strong><small>目标日期倒数文字</small></span><input id="appearanceRightSidebarText" type="color" value="#ff3a3a"></label>
+              <label class="color-setting" for="appearanceWeatherText"><span><strong>天气主文字</strong><small>温度与天气描述</small></span><input id="appearanceWeatherText" type="color" value="#ffffff"></label>
+              <label class="color-setting" for="appearanceWeatherMutedText"><span><strong>天气辅助文字</strong><small>地区与预报说明</small></span><input id="appearanceWeatherMutedText" type="color" value="#dce6f5"></label>
+            </div>
+          </div>
+          <div class="panel appearance-preview-panel">
+            <h3>效果预览</h3>
+            <div id="appearancePreview" class="appearance-preview">
+              <span class="preview-week">MON 星期一</span>
+              <span class="preview-course">数学　英语　物理</span>
+              <span class="preview-current">数学　12:34</span>
+            </div>
+            <p class="hint">颜色修改后可先预览；保存后会同步应用到悬浮栏。</p>
+          </div>
+          <div id="appearanceStatus" class="notice" role="status" aria-live="polite"></div>
+          <div class="actions">
+            <button id="resetAppearance" class="secondary-button" type="button">恢复默认配色</button>
+            <button id="saveAppearance" class="primary-button" type="button">保存并应用</button>
+          </div>
         </section>
         <section class="settings-section hidden" data-panel="exam">
           <div class="section-heading"><div><h2>考试模式</h2><p>简洁、专注的考试计时面板。</p></div></div>
