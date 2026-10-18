@@ -61,7 +61,7 @@ function loadWeatherSettings(store) {
     try {
         return normalizeWeatherSettings(saved);
     } catch (_error) {
-        return { enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: null };
+        return { enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: null };
     }
 }
 
