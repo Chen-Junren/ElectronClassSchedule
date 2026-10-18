@@ -54,7 +54,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
         return ipcRenderer.invoke('getWeatherSnapshot');
     },
     logEvent(event, details) {
-        if (typeof event !== 'string' || !/^user\\.[a-z0-9_.-]{1,100}$/i.test(event)) {
+        if (typeof event !== 'string' || !/^user\.[a-z0-9_.-]{1,100}$/i.test(event)) {
             throw new TypeError('Invalid application log event');
         }
         ipcRenderer.send('appLogEvent', event, details);
