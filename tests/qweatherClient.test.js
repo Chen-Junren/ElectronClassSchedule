@@ -26,10 +26,10 @@ function response(payload) {
     return { ok: true, status: 200, json: async () => payload };
 }
 
-test('makeUrl safely encodes location query values', () => {
-    const url = new URL(makeUrl('geoapi.qweather.com', '/v2/city/lookup', { location: '南山区,深圳市', key: 'x y' }));
+test('makeUrl safely encodes location query values without putting credentials in the URL', () => {
+    const url = new URL(makeUrl('geoapi.qweather.com', '/v2/city/lookup', { location: '南山区,深圳市' }));
     assert.equal(url.searchParams.get('location'), '南山区,深圳市');
-    assert.equal(url.searchParams.get('key'), 'x y');
+    assert.equal(url.searchParams.has('key'), false);
 });
 
 test('chooseLocation disambiguates by district, city, and province', () => {
@@ -42,8 +42,8 @@ test('chooseLocation disambiguates by district, city, and province', () => {
 
 test('getWeatherSnapshot resolves the QWeather ID and returns current and next-hour data', async () => {
     const requests = [];
-    const fetchImpl = async url => {
-        requests.push(new URL(url));
+    const fetchImpl = async (url, options) => {
+        requests.push({ url: new URL(url), headers: options.headers });
         if (url.includes('/v2/city/lookup')) {
             return response({ code: '200', location: [{ id: '101280604', name: '南山区', adm1: '广东省', adm2: '深圳市' }] });
         }
@@ -64,6 +64,10 @@ test('getWeatherSnapshot resolves the QWeather ID and returns current and next-h
     assert.equal(snapshot.nextHour.temp, '28');
     assert.equal(saved.region.qweatherLocationId, '101280604');
     assert.equal(requests.length, 3);
+    assert.equal(requests[1].url.pathname, '/v7/weather/now');
+    assert.equal(requests[2].url.pathname, '/v7/weather/24h');
+    assert.equal(requests[1].url.searchParams.has('key'), false);
+    assert.equal(requests[1].headers['X-QW-Api-Key'], 'test-key');
 });
 
 test('getWeatherSnapshot rejects lookup results that do not match the selected region', async () => {
@@ -105,7 +109,8 @@ test('getWeatherSnapshot logs request inputs and API response bodies without exp
         assert.equal(requests.length, 2);
         assert.equal(responses.length, 2);
         assert.equal(requests[0].details.query.location, '101280604');
-        assert.equal(requests[0].details.query.key, '[REDACTED]');
+        assert.equal(requests[0].details.query.key, undefined);
+        assert.equal(requests[0].details.path, '/v7/weather/now');
         assert.equal(responses.some(record => record.details.body.now && record.details.body.now.temp === '27'), true);
         assert.equal(output.includes('test-key'), false);
         assert.equal(records.at(-1).event, 'weather.snapshot.success');
