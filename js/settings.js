@@ -6,7 +6,6 @@
   const selectedElement = document.getElementById('selectedRegion');
   const weatherEnabled = document.getElementById('weatherEnabled');
   const qweatherHost = document.getElementById('qweatherHost');
-  const qweatherGeoHost = document.getElementById('qweatherGeoHost');
   const qweatherKey = document.getElementById('qweatherKey');
   const statusMessage = document.getElementById('statusMessage');
   const dateOverrideForm = document.getElementById('dateOverrideForm');
@@ -60,6 +59,12 @@
           district: region.district,
           qweatherLocationId: savedSettings.region && savedSettings.region.adminCode === region.code
             ? savedSettings.region.qweatherLocationId || null
+            : null,
+          latitude: savedSettings.region && savedSettings.region.adminCode === region.code
+            ? savedSettings.region.latitude ?? null
+            : null,
+          longitude: savedSettings.region && savedSettings.region.adminCode === region.code
+            ? savedSettings.region.longitude ?? null
             : null
         };
         renderSelectedRegion();
@@ -87,7 +92,6 @@
       }
       weatherEnabled.checked = savedSettings.enabled === true;
       qweatherHost.value = typeof savedSettings.apiHost === 'string' ? savedSettings.apiHost : 'api.qweather.com';
-      qweatherGeoHost.value = typeof savedSettings.geoApiHost === 'string' ? savedSettings.geoApiHost : 'geoapi.qweather.com';
       qweatherKey.value = typeof savedSettings.apiKey === 'string' ? savedSettings.apiKey : '';
       renderSelectedRegion();
       renderResults('');
@@ -214,8 +218,7 @@
 
   document.getElementById('saveSettings').addEventListener('click', async () => {
     const host = qweatherHost.value.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
-    const geoHost = qweatherGeoHost.value.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
-    if ((host && !/^[a-z0-9.-]+(?::\d+)?$/i.test(host)) || (geoHost && !/^[a-z0-9.-]+(?::\d+)?$/i.test(geoHost))) {
+    if ((host && !/^[a-z0-9.-]+(?::\d+)?$/i.test(host))) {
       showStatus('API Host 格式不正确，请只填写域名。', false);
       return;
     }
@@ -231,7 +234,6 @@
     const nextSettings = {
       enabled: weatherEnabled.checked,
       apiHost: host || 'api.qweather.com',
-      geoApiHost: geoHost || 'geoapi.qweather.com',
       apiKey: qweatherKey.value.trim(),
       region: selectedRegion ? {
         adminCode: selectedRegion.adminCode,
@@ -239,7 +241,9 @@
         province: selectedRegion.province,
         city: selectedRegion.city,
         district: selectedRegion.district,
-        qweatherLocationId: selectedRegion.qweatherLocationId || null
+        qweatherLocationId: selectedRegion.qweatherLocationId || null,
+        latitude: selectedRegion.latitude ?? null,
+        longitude: selectedRegion.longitude ?? null
       } : null
     };
     try {
