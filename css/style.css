@@ -237,3 +237,17 @@
 }
 
 .class.holiday { color: rgba(166, 166, 166, .95); }
+
+
+/* User-configurable appearance */
+.leftSidebar .corner { color: var(--left-sidebar-text-color, rgb(0, 238, 255)); }
+.rightSidebar .corner { color: var(--right-sidebar-text-color, #ff3a3a); }
+.class.past { color: var(--past-class-text-color, rgba(166, 166, 166, 1)); }
+.countdowner { background-color: rgba(var(--bar-bg-rgb, 0, 0, 0), var(--global-bg-opacity)); }
+.miniCountdown { background-color: rgba(var(--bar-bg-rgb, 0, 0, 0), var(--global-bg-opacity)); }
+.weatherCurrentRow { display: flex; align-items: center; gap: 10px; }
+.weatherIcon { display: none; width: 44px; height: 44px; object-fit: contain; flex: 0 0 44px; }
+.weatherDescription { display: none; }
+.weatherNextRow { display: flex; align-items: center; gap: 7px; }
+.weatherNextIcon { display: none; width: 24px; height: 24px; object-fit: contain; flex: 0 0 24px; }
+.weatherNextHour { min-width: 0; }
