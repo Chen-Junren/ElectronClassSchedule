@@ -6,6 +6,7 @@
   const selectedElement = document.getElementById('selectedRegion');
   const weatherEnabled = document.getElementById('weatherEnabled');
   const qweatherHost = document.getElementById('qweatherHost');
+  const qweatherGeoHost = document.getElementById('qweatherGeoHost');
   const qweatherKey = document.getElementById('qweatherKey');
   const statusMessage = document.getElementById('statusMessage');
   let regions = [];
@@ -69,6 +70,7 @@
       }
       weatherEnabled.checked = savedSettings.enabled === true;
       qweatherHost.value = typeof savedSettings.apiHost === 'string' ? savedSettings.apiHost : 'api.qweather.com';
+      qweatherGeoHost.value = typeof savedSettings.geoApiHost === 'string' ? savedSettings.geoApiHost : 'geoapi.qweather.com';
       qweatherKey.value = typeof savedSettings.apiKey === 'string' ? savedSettings.apiKey : '';
       renderSelectedRegion();
       renderResults('');
@@ -88,7 +90,8 @@
 
   document.getElementById('saveSettings').addEventListener('click', async () => {
     const host = qweatherHost.value.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
-    if (host && !/^[a-z0-9.-]+(?::\d+)?$/i.test(host)) {
+    const geoHost = qweatherGeoHost.value.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '');
+    if ((host && !/^[a-z0-9.-]+(?::\d+)?$/i.test(host)) || (geoHost && !/^[a-z0-9.-]+(?::\d+)?$/i.test(geoHost))) {
       showStatus('API Host 格式不正确，请只填写域名。', false);
       return;
     }
@@ -104,6 +107,7 @@
     const nextSettings = {
       enabled: weatherEnabled.checked,
       apiHost: host || 'api.qweather.com',
+      geoApiHost: geoHost || 'geoapi.qweather.com',
       apiKey: qweatherKey.value.trim(),
       region: selectedRegion ? {
         adminCode: selectedRegion.adminCode,
@@ -116,7 +120,7 @@
     };
     try {
       savedSettings = await window.electronAPI.saveWeatherSettings(nextSettings);
-      showStatus('设置已安全保存到本机。天气面板会在天气模块接入后读取这些配置。', true);
+      showStatus('设置已保存到本机，悬浮课表会自动读取天气配置。', true);
     } catch (error) {
       showStatus('保存失败：' + (error.message || '本地存储不可用'), false);
     }
