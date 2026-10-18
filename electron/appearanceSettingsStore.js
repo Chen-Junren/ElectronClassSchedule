@@ -5,6 +5,7 @@ const DEFAULT_APPEARANCE_SETTINGS = Object.freeze({
     settingsBackground: '#f4f6fa',
     barBackground: '#000000',
     classText: '#ffffff',
+    pastClassText: '#a6a6a6',
     highlightText: '#00ff0a',
     countdownClassText: '#00ff0a',
     countdownText: '#ffffff',
