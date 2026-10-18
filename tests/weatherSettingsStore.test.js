@@ -46,6 +46,6 @@ test('weather settings reject malformed host, region code, and QWeather ID', () 
 test('invalid stored weather settings safely fall back to defaults', () => {
     const store = createStore({ enabled: true, apiHost: 'https://invalid', geoApiHost: 'geoapi.qweather.com', apiKey: 'x', region: null });
     assert.deepEqual(loadWeatherSettings(store), {
-        enabled: false, apiHost: 'api.qweather.com', apiKey: '', region: null
+        enabled: false, apiHost: 'api.qweather.com', geoApiHost: 'geoapi.qweather.com', apiKey: '', region: null
     });
 });
