@@ -247,10 +247,10 @@
       positionWeatherPanel();
     } catch (error) {
       weatherPanel.style.display = 'block';
-      weatherRegion.innerText = '天气服务暂不可用';
+      weatherRegion.innerText = '天气';
       weatherCurrent.innerText = '--°';
-      weatherDescription.innerText = '请检查网络、API Host 和 API Key';
-      weatherNextHour.innerText = '暂时无法获取未来一小时预报';
+      weatherDescription.innerText = '未获取到天气信息';
+      weatherNextHour.innerText = '未获取到天气信息';
       setWeatherIcon(weatherIcon, null, '');
       setWeatherIcon(weatherNextIcon, null, '');
       positionWeatherPanel();
