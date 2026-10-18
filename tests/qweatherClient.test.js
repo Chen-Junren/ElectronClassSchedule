@@ -1,5 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { createLogger } = require('../electron/logger');
 const { getWeatherSnapshot, chooseLocation, makeUrl } = require('../electron/qweatherClient');
 
 const region = {
@@ -72,4 +76,40 @@ test('getWeatherSnapshot rejects lookup results that do not match the selected r
 
 test('getWeatherSnapshot returns disabled when weather is not configured', async () => {
     assert.deepEqual(await getWeatherSnapshot({ enabled: false }), { enabled: false });
+});
+
+
+test('getWeatherSnapshot logs request inputs and API response bodies without exposing the API key', async () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'qweather-log-test-'));
+    const logPath = path.join(directory, 'app.log');
+    try {
+        const logger = createLogger({ filePath: logPath });
+        const configuredSettings = {
+            ...settings,
+            region: { ...region, qweatherLocationId: '101280604' }
+        };
+        const fetchImpl = async url => {
+            if (url.includes('/v7/weather/now')) {
+                return response({ code: '200', now: { temp: '27', text: '多云', icon: '101' } });
+            }
+            return response({ code: '200', hourly: [{ fxTime: '2999-01-01T11:00+08:00', temp: '28', text: '晴' }] });
+        };
+
+        const snapshot = await getWeatherSnapshot(configuredSettings, { fetchImpl, logger });
+        const output = fs.readFileSync(logPath, 'utf8');
+        const records = output.trim().split('\\n').map(line => JSON.parse(line));
+        const requests = records.filter(record => record.event === 'weather.api.request');
+        const responses = records.filter(record => record.event === 'weather.api.response');
+
+        assert.equal(snapshot.now.temp, '27');
+        assert.equal(requests.length, 2);
+        assert.equal(responses.length, 2);
+        assert.equal(requests[0].details.query.location, '101280604');
+        assert.equal(requests[0].details.query.key, '[REDACTED]');
+        assert.equal(responses.some(record => record.details.body.now && record.details.body.now.temp === '27'), true);
+        assert.equal(output.includes('test-key'), false);
+        assert.equal(records.at(-1).event, 'weather.snapshot.success');
+    } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+    }
 });
