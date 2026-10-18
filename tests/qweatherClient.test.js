@@ -62,9 +62,9 @@ test('getWeatherSnapshot resolves the QWeather ID and returns current and next-h
     assert.equal(requests.length, 3);
 });
 
-test('getWeatherSnapshot reports unresolved ambiguous districts', async () => {
+test('getWeatherSnapshot rejects lookup results that do not match the selected region', async () => {
     const fetchImpl = async () => response({ code: '200', location: [
-        { id: '1', name: '南山区', adm1: '广东省', adm2: '深圳市' },
+        { id: '1', name: '南山区', adm1: '广东省', adm2: '其他市' },
         { id: '2', name: '南山区', adm1: '其他省', adm2: '其他市' }
     ] });
     await assert.rejects(() => getWeatherSnapshot(settings, { fetchImpl }), /could not resolve/);
