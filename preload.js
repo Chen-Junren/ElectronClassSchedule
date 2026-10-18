@@ -20,6 +20,7 @@ const receiveChannels = new Set([
     'ClassHidden',
     'setDayOffset',
     'getDayOffset',
+    'applyScheduleDay',
     'weatherSettingsChanged',
     'dateOverridesChanged',
     'appearanceSettingsChanged'
