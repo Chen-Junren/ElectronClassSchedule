@@ -64,10 +64,16 @@ function registerIpcHandlers({
     getTrayMenu,
     getBasePath,
     setAutoLaunch,
-    store
+    store,
+    logger
 }) {
+    const writeLog = (level, event, details) => {
+        if (logger && typeof logger[level] === 'function') logger[level](event, details);
+    };
+
     ipcMain.on('log', (_event, arg) => {
         if (typeof arg === 'string' || typeof arg === 'number' || typeof arg === 'boolean') {
+            writeLog('info', 'renderer.log', { value: arg });
             console.log(arg);
         }
     });
@@ -85,11 +91,18 @@ function registerIpcHandlers({
     });
 
     ipcMain.on('dialog', (event, request) => {
+        writeLog('info', 'user.dialog.requested', {
+            reply: request && request.reply,
+            title: request && request.options && request.options.title,
+            message: request && request.options && request.options.message,
+            buttons: request && request.options && request.options.buttons
+        });
         const win = getWindow();
         if (!win || win.isDestroyed()) return;
 
         const normalizedRequest = normalizeDialogRequest(request);
         if (!normalizedRequest) {
+            writeLog('warn', 'dialog.request_rejected', { reason: 'Invalid dialog request' });
             console.warn('[dialog] Rejected invalid dialog request');
             return;
         }
@@ -101,16 +114,19 @@ function registerIpcHandlers({
                 && data.response < normalizedRequest.options.buttons.length
                 ? data.response
                 : -1;
+            writeLog('info', 'user.dialog.responded', { reply: normalizedRequest.reply, responseIndex });
             event.reply(normalizedRequest.reply, {
                 arg: normalizedRequest,
                 index: responseIndex
             });
         }).catch((error) => {
+            writeLog('error', 'dialog.show_failed', error);
             console.error('[dialog] Failed to show message box:', error);
         });
     });
 
     ipcMain.on('pop', () => {
+        writeLog('info', 'user.tray_menu.open_requested');
         const trayMenu = getTrayMenu();
         if (trayMenu && trayMenu.tray && trayMenu.form) {
             trayMenu.tray.popUpContextMenu(trayMenu.form);
@@ -118,6 +134,7 @@ function registerIpcHandlers({
     });
 
     ipcMain.on('getTimeOffset', (_event, arg) => {
+        writeLog('info', 'user.time_offset_dialog.opened', { currentOffset: arg });
         const initialOffset = Number(arg);
         if (!Number.isSafeInteger(initialOffset)) {
             console.warn('[getTimeOffset] Rejected invalid offset');
@@ -135,6 +152,7 @@ function registerIpcHandlers({
             icon: getBasePath() + 'image/clock.png'
         }).then((result) => {
             if (result === null) {
+                writeLog('info', 'user.time_offset_change_cancelled');
                 console.log('[getTimeOffset] User cancelled');
                 return;
             }
@@ -145,11 +163,14 @@ function registerIpcHandlers({
                 return;
             }
 
+            const normalizedOffset = value % 10000000000000;
+            writeLog('info', 'user.time_offset_changed', { offsetSeconds: normalizedOffset });
             const win = getWindow();
             if (win && !win.isDestroyed()) {
-                win.webContents.send('setTimeOffset', value % 10000000000000);
+                win.webContents.send('setTimeOffset', normalizedOffset);
             }
         }).catch((error) => {
+            writeLog('error', 'time_offset.prompt_failed', error);
             console.error('[getTimeOffset] Prompt failed:', error);
         });
     });
