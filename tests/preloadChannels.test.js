@@ -17,14 +17,14 @@ function channelsFromSet(setName) {
 
 test('preload receive allowlist includes every renderer IPC event listener', () => {
     const allowed = channelsFromSet('receiveChannels');
-    const used = new Set(Array.from(renderer.matchAll(/ipcRenderer\.on\(\\s*['"]([^'"]+)['"]/g), item => item[1]));
+    const used = new Set(Array.from(renderer.matchAll(/ipcRenderer\.on\(\s*['"]([^'"]+)['"]/g), item => item[1]));
     const missing = [...used].filter(channel => !allowed.has(channel));
     assert.deepEqual(missing, [], 'Missing receiveChannels entries: ' + missing.join(', '));
 });
 
 test('preload send allowlist includes every renderer IPC send channel', () => {
     const allowed = channelsFromSet('sendChannels');
-    const used = new Set(Array.from(renderer.matchAll(/ipcRenderer\.send\(\\s*['"]([^'"]+)['"]/g), item => item[1]));
+    const used = new Set(Array.from(renderer.matchAll(/ipcRenderer\.send\(\s*['"]([^'"]+)['"]/g), item => item[1]));
     const missing = [...used].filter(channel => !allowed.has(channel));
     assert.deepEqual(missing, [], 'Missing sendChannels entries: ' + missing.join(', '));
 });
