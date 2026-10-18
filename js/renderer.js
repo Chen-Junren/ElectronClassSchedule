@@ -190,28 +190,23 @@
     weatherPanel.style.left = Math.max(12, left) + 'px';
   }
 
-  function setWeatherIcon(imageElement, code, description) {
-    if (!imageElement) return;
+  function setWeatherIcon(iconElement, code, description) {
+    if (!iconElement) return;
     const normalizedCode = typeof code === 'string' && /^\\d{3}$/.test(code) ? code : '';
-    const descriptionElement = imageElement.id === 'weatherIcon' ? weatherDescription : null;
+    const descriptionElement = iconElement.id === 'weatherIcon' ? weatherDescription : null;
     if (!normalizedCode) {
-      imageElement.removeAttribute('src');
-      imageElement.style.display = 'none';
+      iconElement.className = iconElement.id === 'weatherIcon' ? 'weatherIcon' : 'weatherNextIcon';
+      iconElement.style.display = 'none';
       if (descriptionElement) descriptionElement.style.display = 'block';
       return;
     }
-    const source = 'https://a.hecdn.net/img/common/icon/202106d/' + normalizedCode + '.png';
-    if (imageElement.dataset.iconCode === normalizedCode && imageElement.src === source) return;
-    imageElement.dataset.iconCode = normalizedCode;
-    imageElement.alt = description || '天气图标';
-    imageElement.style.display = 'block';
+
+    iconElement.className = (iconElement.id === 'weatherIcon' ? 'weatherIcon' : 'weatherNextIcon')
+      + ' qi-' + normalizedCode + '-fill';
+    iconElement.setAttribute('aria-label', description || '天气图标');
+    iconElement.title = description || '';
+    iconElement.style.display = 'inline-block';
     if (descriptionElement) descriptionElement.style.display = 'none';
-    imageElement.onerror = () => {
-      imageElement.style.display = 'none';
-      imageElement.removeAttribute('src');
-      if (descriptionElement) descriptionElement.style.display = 'block';
-    };
-    imageElement.src = source;
   }
 
   async function refreshWeather() {
