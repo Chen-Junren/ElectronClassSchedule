@@ -10,6 +10,14 @@ function createHarness() {
     let trayInstance;
     let menuTemplate;
     let settingsOpenCount = 0;
+    const openedPaths = [];
+    const loggerEntries = [];
+    const logger = {
+        filePath: '/app-data/logs/app.log',
+        info(event, details) { loggerEntries.push({ level: 'info', event, details }); },
+        warn(event, details) { loggerEntries.push({ level: 'warn', event, details }); },
+        error(event, details) { loggerEntries.push({ level: 'error', event, details }); }
+    };
 
     class FakeTray {
         constructor(iconPath) { this.iconPath = iconPath; this.events = new Map(); trayInstance = this; }
@@ -31,9 +39,13 @@ function createHarness() {
     const app = { quit() { this.quitCalled = true; } };
     const dialog = { showMessageBox: async () => ({ response: 0 }) };
     const manager = createTrayManager({
-        app, dialog, getWindow: () => currentWindow, store, getBasePath: () => '/app/',
+        app, dialog, getWindow: () => currentWindow, store, getBasePath: () => '/app/', logger,
         setAutoLaunch() {}, openSettingsWindow() { settingsOpenCount += 1; },
-        Menu: menuApi, Tray: FakeTray, shell: { openExternal() {} }
+        Menu: menuApi, Tray: FakeTray,
+        shell: {
+            openExternal() {},
+            async openPath(value) { openedPaths.push(value); return ''; }
+        }
     });
 
     function makeWindow() {
@@ -48,7 +60,7 @@ function createHarness() {
         return win;
     }
     return {
-        handlers, sent, windows, makeWindow, manager,
+        handlers, sent, windows, makeWindow, manager, openedPaths, loggerEntries,
         get tray() { return trayInstance; },
         get template() { return menuTemplate; },
         get settingsOpenCount() { return settingsOpenCount; },
@@ -139,4 +151,19 @@ test('tray menu keeps all actions at one level without redundant submenu heading
     assert.equal(labels.includes('退出电子课表'), true);
     assert.equal(labels.includes('窗口行为'), false);
     assert.equal(labels.includes('启动与退出'), false);
+});
+
+
+test('tray log action opens the directory containing app.log', async () => {
+    const harness = createHarness();
+    harness.makeWindow();
+    harness.manager.registerWeekMenuHandler({ on: (channel, callback) => harness.handlers.set(channel, callback) });
+    harness.handlers.get('getWeekIndex')({}, 0);
+
+    const logItem = findItem(harness.template, '打开日志文件夹');
+    assert.ok(logItem, 'log folder action should be present in the flat tray menu');
+    await logItem.click();
+
+    assert.deepEqual(harness.openedPaths, ['/app-data/logs']);
+    assert.equal(harness.loggerEntries.some(entry => entry.event === 'user.open_logs_folder_succeeded'), true);
 });
