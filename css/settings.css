@@ -61,3 +61,14 @@ input + .hint { margin-top: 7px; margin-bottom: 16px; }
 .day-choice:hover, .day-choice:focus { border-color: #6685bb; background: #eef3fb; outline: none; }
 .day-hint { margin-top: 14px; margin-bottom: 18px; }
 @media (max-width: 900px) { .day-options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+.calendar-form { display: block; }
+.calendar-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-bottom: 16px; }
+.calendar-grid select { width: 100%; min-height: 42px; padding: 9px 10px; border: 1px solid #d5dce7; border-radius: 8px; background: #fff; color: #202938; }
+.date-override-list { display: flex; flex-direction: column; gap: 9px; }
+.date-override-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px; border: 1px solid #e7ebf2; border-radius: 9px; background: #fafbfd; }
+.date-override-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.date-override-info strong { font-size: 13px; line-height: 1.5; }
+.date-override-info span { color: #818b9b; font-size: 12px; overflow-wrap: anywhere; }
+.date-override-row .secondary-button { flex-shrink: 0; padding: 7px 12px; }
+@media (max-width: 900px) { .calendar-grid { grid-template-columns: 1fr; } }
