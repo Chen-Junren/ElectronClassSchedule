@@ -1,4 +1,4 @@
-function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, Menu: menuApi, Tray: trayApi, shell: shellApi }) {
+function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAutoLaunch, openSettingsWindow, Menu: menuApi, Tray: trayApi, shell: shellApi }) {
     if (!menuApi || !trayApi || !shellApi) {
         const electron = require('electron');
         menuApi = menuApi || electron.Menu;
@@ -43,7 +43,10 @@ function createTrayManager({ app, dialog, getWindow, store, getBasePath, setAuto
                 {
                     icon: getBasePath() + 'image/setting.png',
                     label: '配置课表',
-                    click: () => sendToWindow('openSettingDialog')
+                    click: () => {
+                        if (typeof openSettingsWindow === 'function') openSettingsWindow();
+                        else sendToWindow('openSettingDialog');
+                    }
                 },
                 {
                     icon: getBasePath() + 'image/clock.png',
