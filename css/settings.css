@@ -96,3 +96,28 @@ input + .hint { margin-top: 7px; margin-bottom: 16px; }
 .preview-weather { color: var(--preview-weather-text, #fff); }
 .preview-weather-muted { color: var(--preview-weather-muted-text, #dce6f5); font-size: 11px; }
 @media (max-width: 900px) { .color-grid { grid-template-columns: 1fr; } }
+
+
+/* Exam mode settings */
+.exam-settings-subtitle { margin-bottom: 14px; font-size: 15px; }
+#examTitle, #examDurationMinutes, #examTotalPages {
+  display: block; width: 100%; min-height: 42px; margin-bottom: 16px; padding: 10px 12px;
+  border: 1px solid #d5dce7; border-radius: 8px; background: #fff; color: #202938;
+}
+#examDurationMinutes, #examTotalPages { max-width: 220px; }
+.exam-page-toggle { display: flex; align-items: center; gap: 9px; margin: 4px 0 14px; color: #465267; font-size: 13px; }
+.exam-page-toggle input { accent-color: #345b91; }
+.exam-total-pages-field { max-width: 280px; }
+.exam-config-actions { margin-top: 12px; }
+.exam-control-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 9px; }
+.exam-status-badge { display: inline-flex; flex-shrink: 0; align-items: center; padding: 5px 10px; border-radius: 99px; color: #526175; background: #edf1f6; font-size: 11px; }
+.exam-status-badge[data-status="running"] { color: #17643b; background: #e3f6e9; }
+.exam-status-badge[data-status="paused"] { color: #85540b; background: #fff3d6; }
+.exam-status-badge[data-status="finished"] { color: #8f2828; background: #fde8e8; }
+.exam-history-list { display: flex; flex-direction: column; gap: 9px; }
+.exam-history-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px; border: 1px solid #e7ebf2; border-radius: 9px; background: #fafbfd; }
+.exam-history-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.exam-history-info strong { overflow-wrap: anywhere; font-size: 13px; }
+.exam-history-info span { color: #818b9b; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.exam-history-result { flex-shrink: 0; padding: 4px 7px; border-radius: 6px; color: #526175; background: #edf1f6; font-size: 11px; }
+@media (max-width: 900px) { .exam-history-row { align-items: flex-start; flex-direction: column; } }
