@@ -16,6 +16,19 @@
   let weatherCurrent = document.getElementById('weatherCurrent')
   let weatherDescription = document.getElementById('weatherDescription')
   let weatherIcon = document.getElementById('weatherIcon')
+  const examPanel = document.getElementById('examPanel');
+  const examPanelEyebrow = document.getElementById('examPanelEyebrow');
+  const examPanelTitle = document.getElementById('examPanelTitle');
+  const examPanelState = document.getElementById('examPanelState');
+  const examPanelClock = document.getElementById('examPanelClock');
+  const examPanelCaption = document.getElementById('examPanelCaption');
+  const examPanelPages = document.getElementById('examPanelPages');
+  const examPanelPause = document.getElementById('examPanelPause');
+  const examPanelResume = document.getElementById('examPanelResume');
+  const examPanelEnd = document.getElementById('examPanelEnd');
+  const examPanelExit = document.getElementById('examPanelExit');
+  let examSnapshot = null;
+  let examModeActive = false;
   let root = document.querySelector(':root');
   const qweatherIconStylesheet = document.getElementById('qweatherIconStylesheet');
   let weatherIconsAvailable = Boolean(qweatherIconStylesheet && qweatherIconStylesheet.sheet);
@@ -243,6 +256,107 @@
     }
   }
 
+  function formatExamClock(totalSeconds) {
+    const seconds = Math.max(0, Math.floor(Number(totalSeconds) || 0));
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainder = seconds % 60;
+    return [hours, minutes, remainder].map(value => String(value).padStart(2, '0')).join(':');
+  }
+
+  function getExamRemainingSeconds(session) {
+    if (!session || session.status !== 'running') return session ? session.remainingSeconds : 0;
+    const now = Date.now();
+    const serverNow = examSnapshot && Number.isFinite(examSnapshot.serverNowMs)
+      ? examSnapshot.serverNowMs : now;
+    const elapsedMs = Math.max(0, session.elapsedMs + Math.max(0, now - serverNow));
+    return Math.max(0, Math.ceil((session.durationSeconds * 1000 - elapsedMs) / 1000));
+  }
+
+  function renderExamPanel(snapshot) {
+    const session = snapshot && snapshot.activeSession;
+    if (!session) return;
+    const remainingSeconds = getExamRemainingSeconds(session);
+    examPanelTitle.textContent = session.title;
+    examPanelClock.textContent = formatExamClock(remainingSeconds);
+    examPanelPages.textContent = session.showPageCount && session.totalPages
+      ? '试卷总页数：' + session.totalPages
+      : '';
+    examPanelPages.style.display = session.showPageCount && session.totalPages ? 'block' : 'none';
+
+    const isRunning = session.status === 'running';
+    const isPaused = session.status === 'paused';
+    const isFinished = session.status === 'finished';
+    examPanelPause.style.display = isRunning ? 'inline-flex' : 'none';
+    examPanelResume.style.display = isPaused ? 'inline-flex' : 'none';
+    examPanelEnd.style.display = (isRunning || isPaused) ? 'inline-flex' : 'none';
+    examPanelExit.style.display = isFinished ? 'inline-flex' : 'none';
+
+    examPanel.dataset.status = isFinished ? 'finished' : (isPaused ? 'paused' : 'running');
+    if (isFinished) {
+      examPanelEyebrow.textContent = '本场考试已结束';
+      examPanelState.textContent = session.result === 'ended_early' ? '提前结束' : '时间到';
+      examPanelCaption.textContent = session.result === 'ended_early'
+        ? '考试已提前结束，请确认后退出。'
+        : '倒计时已归零，请确认后退出。';
+    } else if (isPaused) {
+      examPanelEyebrow.textContent = '考试计时已暂停';
+      examPanelState.textContent = '已暂停';
+      examPanelCaption.textContent = '剩余时间（暂停中）';
+    } else {
+      examPanelEyebrow.textContent = '考试进行中';
+      examPanelState.textContent = '计时中';
+      examPanelCaption.textContent = '剩余时间';
+    }
+  }
+
+  function applyExamSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object') return;
+    const previousMode = examModeActive;
+    examSnapshot = snapshot;
+    examModeActive = Boolean(snapshot.activeSession);
+
+    if (examModeActive) {
+      globalContainer.style.display = 'none';
+      miniCountdown.style.display = 'none';
+      examPanel.style.display = 'flex';
+      renderExamPanel(snapshot);
+    } else {
+      examPanel.style.display = 'none';
+      globalContainer.style.display = '';
+      if (previousMode) {
+        tick(true);
+        positionWeatherPanel();
+      }
+    }
+  }
+
+  async function runExamAction(action, confirmMessage) {
+    if (confirmMessage && !window.confirm(confirmMessage)) return;
+    try {
+      const snapshot = await action();
+      applyExamSnapshot(snapshot);
+    } catch (error) {
+      console.error('[exam] Action failed:', error);
+      examPanelCaption.textContent = '操作失败：' + (error.message || '未知错误');
+    }
+  }
+
+  examPanelPause.addEventListener('click', () => runExamAction(() => ipcRenderer.pauseExam()));
+  examPanelResume.addEventListener('click', () => runExamAction(() => ipcRenderer.resumeExam()));
+  examPanelEnd.addEventListener('click', () => runExamAction(
+    () => ipcRenderer.endExamEarly(),
+    '确定提前结束本场考试并保存记录吗？'
+  ));
+  examPanelExit.addEventListener('click', () => runExamAction(
+    () => ipcRenderer.exitExam(),
+    '退出考试面板并恢复普通课表？本场考试记录已经保存。'
+  ));
+  ipcRenderer.on('examStateChanged', (_event, snapshot) => applyExamSnapshot(snapshot));
+  ipcRenderer.getExamState().then(applyExamSnapshot).catch(error => {
+    console.warn('[exam] Failed to load exam state:', error);
+  });
+
   function tick(reset = false) {
     scheduleData = getScheduleData();
     const scheduleChanged = JSON.stringify(scheduleData.scheduleArray) != JSON.stringify(lastScheduleData.scheduleArray) ||
@@ -285,7 +399,16 @@
 
   let timer = undefined
   window.addEventListener("mousemove", event => {
-    if (event.target.className && event.target.className.indexOf('notIgnoreClick') == -1) {
+    const target = event.target;
+    const examPanelHover = Boolean(target && typeof target.closest === 'function' && target.closest('#examPanel'));
+    const className = target && typeof target.className === 'string' ? target.className : '';
+    if (examPanelHover) {
+      root.style.opacity = '1';
+      clearTimeout(timer);
+      ipcRenderer.send('setIgnore', false);
+      return;
+    }
+    if (className && className.indexOf('notIgnoreClick') == -1) {
       root.style.opacity = '0.2'
       clearTimeout(timer)
       timer = setTimeout(() => {
@@ -295,7 +418,7 @@
       clearTimeout(timer)
       root.style.opacity = '1'
     }
-    if (event.target.className.indexOf('notIgnoreClick') == -1) {
+    if (className.indexOf('notIgnoreClick') == -1) {
       ipcRenderer.send('setIgnore', true)
     } else {
       ipcRenderer.send('setIgnore', false)
