@@ -16,8 +16,6 @@
   let weatherCurrent = document.getElementById('weatherCurrent')
   let weatherDescription = document.getElementById('weatherDescription')
   let weatherIcon = document.getElementById('weatherIcon')
-  let weatherNextIcon = document.getElementById('weatherNextIcon')
-  let weatherNextHour = document.getElementById('weatherNextHour')
   let root = document.querySelector(':root');
   const qweatherIconStylesheet = document.getElementById('qweatherIconStylesheet');
   let weatherIconsAvailable = Boolean(qweatherIconStylesheet && qweatherIconStylesheet.sheet);
@@ -25,7 +23,6 @@
     qweatherIconStylesheet.addEventListener('error', () => {
       weatherIconsAvailable = false;
       if (weatherIcon) weatherIcon.style.display = 'none';
-      if (weatherNextIcon) weatherNextIcon.style.display = 'none';
       if (weatherDescription) weatherDescription.style.display = 'block';
     });
   }
@@ -201,14 +198,13 @@
     const normalizedCode = typeof code === 'string' && /^\d{3}$/.test(code) ? code : '';
     const descriptionElement = iconElement.id === 'weatherIcon' ? weatherDescription : null;
     if (!normalizedCode || !weatherIconsAvailable) {
-      iconElement.className = iconElement.id === 'weatherIcon' ? 'weatherIcon' : 'weatherNextIcon';
+      iconElement.className = 'weatherIcon';
       iconElement.style.display = 'none';
       if (descriptionElement) descriptionElement.style.display = 'block';
       return;
     }
 
-    iconElement.className = (iconElement.id === 'weatherIcon' ? 'weatherIcon' : 'weatherNextIcon')
-      + ' qi-' + normalizedCode + '-fill';
+    iconElement.className = 'weatherIcon qi-' + normalizedCode + '-fill';
     iconElement.setAttribute('aria-label', description || '天气图标');
     iconElement.title = description || '';
     iconElement.style.display = 'inline-block';
@@ -220,9 +216,7 @@
     weatherPanel.style.display = 'block';
     weatherCurrent.innerText = '--°';
     weatherDescription.innerText = message;
-    weatherNextHour.innerText = message;
     setWeatherIcon(weatherIcon, null, '');
-    setWeatherIcon(weatherNextIcon, null, '');
     positionWeatherPanel();
   }
 
@@ -242,15 +236,6 @@
       weatherCurrent.innerText = temperature !== null && temperature !== undefined && temperature !== '' ? temperature + '°' : '--°';
       weatherDescription.innerText = condition || '未获取到天气信息';
       setWeatherIcon(weatherIcon, snapshot.now && snapshot.now.icon, condition);
-      if (snapshot.nextHour) {
-        const nextTemp = snapshot.nextHour.temp ? snapshot.nextHour.temp + '°' : '--°';
-        const nextText = snapshot.nextHour.text || '暂无天气描述';
-        weatherNextHour.innerText = nextTemp + ' · ' + nextText;
-        setWeatherIcon(weatherNextIcon, snapshot.nextHour.icon, nextText);
-      } else {
-        weatherNextHour.innerText = '未获取到天气信息';
-        setWeatherIcon(weatherNextIcon, null, '');
-      }
       positionWeatherPanel();
     } catch (error) {
       showWeatherUnavailable();
