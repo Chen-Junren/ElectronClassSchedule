@@ -181,26 +181,14 @@ async function getWeatherSnapshot(settings, options = {}) {
     const { locationId, latitude, longitude } = await resolveCoordinates(settings, options, logger);
     const lat = latitude.toFixed(2);
     const lon = longitude.toFixed(2);
-    const [nowPayload, hourlyPayload] = await Promise.all([
-        requestJson(fetchImpl, makeUrl(settings.apiHost, '/weather/v1/current/' + lat + '/' + lon, { lang: 'zh', localTime: 'true' }), logger, settings.apiKey),
-        requestJson(fetchImpl, makeUrl(settings.apiHost, '/weather/v1/hourly/' + lat + '/' + lon, { hours: 2, lang: 'zh', localTime: 'true' }), logger, settings.apiKey)
-    ]);
+    const nowPayload = await requestJson(fetchImpl, makeUrl(settings.apiHost, '/weather/v1/current/' + lat + '/' + lon, { lang: 'zh', localTime: 'true' }), logger, settings.apiKey);
 
     if (!nowPayload.condition || typeof nowPayload.condition !== 'object'
-        || !nowPayload.temperature || typeof nowPayload.temperature !== 'object'
-        || !Array.isArray(hourlyPayload.hours)) {
+        || !nowPayload.temperature || typeof nowPayload.temperature !== 'object') {
         throw new Error('Unexpected QWeather V1 response schema');
     }
-    const hours = hourlyPayload.hours;
-    const currentTime = Date.now();
-    const nextHour = hours.find(item => {
-        const timestamp = Date.parse(item && item.forecastTime || '');
-        return Number.isFinite(timestamp) && timestamp > currentTime;
-    }) || hours[0] || null;
     const nowCondition = nowPayload.condition || {};
     const nowTemperature = nowPayload.temperature || {};
-    const nextCondition = nextHour && nextHour.condition || {};
-    const nextTemperature = nextHour && nextHour.temperature || {};
     const snapshot = {
         enabled: true,
         regionLabel: region.label,
@@ -213,12 +201,6 @@ async function getWeatherSnapshot(settings, options = {}) {
             icon: stringValue(nowCondition.code),
             obsTime: null
         },
-        nextHour: nextHour ? {
-            temp: stringValue(nextTemperature.value),
-            text: stringValue(nextCondition.text),
-            icon: stringValue(nextCondition.code),
-            fxTime: stringValue(nextHour.forecastTime)
-        } : null,
         attribution: Array.isArray(nowPayload.metadata && nowPayload.metadata.attributions)
             ? nowPayload.metadata.attributions
             : [],
