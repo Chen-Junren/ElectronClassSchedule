@@ -50,11 +50,22 @@
     width: auto;
 }
 
-.globalContainer {
+.topBarGroup {
     position: fixed;
     top: var(--top-space);
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+    width: max-content;
+}
+
+.globalContainer {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
 }
 
 .class {
@@ -178,9 +189,10 @@
 }
 
 .weatherPanel {
-    position: fixed;
-    top: var(--top-space);
-    left: 12px;
+    position: relative;
+    top: auto;
+    left: auto;
+    align-self: stretch;
     display: none;
     width: 420px;
     height: auto;
