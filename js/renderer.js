@@ -192,12 +192,7 @@
     if (!weatherPanel || weatherPanel.style.display === 'none' || getComputedStyle(weatherPanel).display === 'none') return;
     const anchor = rightSidebar.style.display !== 'none' ? rightSidebar : classContainer;
     const anchorRect = anchor.getBoundingClientRect();
-    const panelWidth = weatherPanel.offsetWidth || 420;
     weatherPanel.style.height = Math.max(0, anchorRect.height) + 'px';
-    // Keep the weather panel to the right of the day-countdown sidebar.
-    // Do not flip it to the left of the main schedule when the window is narrow.
-    const left = anchorRect.right + 12;
-    weatherPanel.style.left = left + 'px';
   }
 
   function setWeatherIcon(iconElement, code, description) {
