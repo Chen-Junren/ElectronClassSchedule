@@ -23,11 +23,32 @@ const receiveChannels = new Set([
     'applyScheduleDay',
     'weatherSettingsChanged',
     'dateOverridesChanged',
-    'appearanceSettingsChanged'
+    'appearanceSettingsChanged',
+    'examStateChanged'
 ]);
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    getDateOverrides() {
+    getExamState() {
+        return ipcRenderer.invoke('exam:getState');
+    },
+    saveExamSettings(settings) {
+        return ipcRenderer.invoke('exam:saveSettings', settings);
+    },
+    startExam(settings) {
+        return ipcRenderer.invoke('exam:start', settings);
+    },
+    pauseExam() {
+        return ipcRenderer.invoke('exam:pause');
+    },
+    resumeExam() {
+        return ipcRenderer.invoke('exam:resume');
+    },
+    endExamEarly() {
+        return ipcRenderer.invoke('exam:endEarly');
+    },
+    exitExam() {
+        return ipcRenderer.invoke('exam:exit');
+    },    getDateOverrides() {
         return ipcRenderer.invoke('getDateOverrides');
     },
     saveDateOverrides(overrides) {
