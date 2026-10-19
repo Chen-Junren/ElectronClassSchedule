@@ -34,8 +34,7 @@
     <div class="leftSidebar sidebar background" id="leftSidebar"><span id="weekEN" class="t">Load</span><div class="corner options notIgnoreClick" id="weekCH">ing</div></div>
     <div class="rightSidebar sidebar background" id="rightSidebar"><span id="countdownDays" class="t">000</span><div class="corner">天</div></div>
   <section class="weatherPanel" id="weatherPanel" aria-live="polite" aria-label="天气信息">
-    <div class="weatherColumns">
-      <div class="weatherColumn weatherCurrentColumn">
+    <div class="weatherCurrentColumn">
         <div class="weatherColumnTitle">当前天气</div>
         <div class="weatherCurrentRow">
           <i class="weatherIcon" id="weatherIcon" role="img" aria-label="天气图标"></i>
@@ -43,14 +42,6 @@
         </div>
         <div class="weatherDescription" id="weatherDescription">等待天气数据</div>
       </div>
-      <div class="weatherColumn weatherNextColumn">
-        <div class="weatherColumnTitle">未来一小时</div>
-        <div class="weatherNextRow">
-          <i class="weatherNextIcon" id="weatherNextIcon" aria-hidden="true"></i>
-          <div class="weatherNextHour" id="weatherNextHour">--</div>
-        </div>
-      </div>
-    </div>
   </section>
   </div>
   <div class="miniCountdown" id="miniCountdown">00:00</div>
