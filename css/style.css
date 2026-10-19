@@ -50,7 +50,7 @@
     width: auto;
 }
 
-.topBarGroup {
+.globalContainer {
     position: fixed;
     top: var(--top-space);
     left: 50%;
@@ -59,13 +59,6 @@
     align-items: stretch;
     gap: 12px;
     width: max-content;
-}
-
-.globalContainer {
-    position: relative;
-    top: auto;
-    left: auto;
-    transform: none;
 }
 
 .class {
