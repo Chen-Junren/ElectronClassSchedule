@@ -258,6 +258,182 @@
     }
   });
 
+  const examTitleInput = document.getElementById('examTitle');
+  const examDurationInput = document.getElementById('examDurationMinutes');
+  const examShowPagesInput = document.getElementById('examShowPageCount');
+  const examTotalPagesInput = document.getElementById('examTotalPages');
+  const examTotalPagesField = document.getElementById('examTotalPagesField');
+  const examFormStatus = document.getElementById('examFormStatus');
+  const examCurrentDescription = document.getElementById('examCurrentDescription');
+  const examCurrentBadge = document.getElementById('examCurrentBadge');
+  const examHistoryList = document.getElementById('examHistoryList');
+  const saveExamSettingsButton = document.getElementById('saveExamSettings');
+  const startExamButton = document.getElementById('startExam');
+  const pauseExamButton = document.getElementById('pauseExam');
+  const resumeExamButton = document.getElementById('resumeExam');
+  const endExamEarlyButton = document.getElementById('endExamEarly');
+  const exitExamButton = document.getElementById('exitExam');
+  let examFormDirty = false;
+
+  function collectExamSettings() {
+    return {
+      title: examTitleInput.value,
+      durationMinutes: Number(examDurationInput.value),
+      showPageCount: examShowPagesInput.checked,
+      totalPages: examShowPagesInput.checked ? Number(examTotalPagesInput.value) : null
+    };
+  }
+
+  function populateExamSettings(settings) {
+    examTitleInput.value = settings.title || '';
+    examDurationInput.value = String(settings.durationMinutes || 120);
+    examShowPagesInput.checked = settings.showPageCount === true;
+    examTotalPagesInput.value = String(settings.totalPages || 1);
+    examTotalPagesField.classList.toggle('hidden', !examShowPagesInput.checked);
+  }
+
+  function showExamFormStatus(message, success = false) {
+    examFormStatus.textContent = message;
+    examFormStatus.className = success ? 'notice success' : 'notice';
+  }
+
+  function formatExamDuration(seconds) {
+    const value = Math.max(0, Number(seconds) || 0);
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor((value % 3600) / 60);
+    const remainder = value % 60;
+    if (hours > 0) return hours + ' 小时 ' + minutes + ' 分钟';
+    if (minutes > 0) return minutes + ' 分钟' + (remainder ? ' ' + remainder + ' 秒' : '');
+    return remainder + ' 秒';
+  }
+
+  function formatExamDate(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '时间未知';
+    return date.toLocaleString();
+  }
+
+  function getExamResultLabel(result) {
+    return ({
+      completed: '正常结束',
+      ended_early: '提前结束',
+      interrupted: '中断'
+    })[result] || '未知结果';
+  }
+
+  function renderExamHistory(history) {
+    examHistoryList.replaceChildren();
+    if (!Array.isArray(history) || history.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'empty-state';
+      empty.textContent = '还没有考试记录。完成或结束第一场考试后，记录会显示在这里。';
+      examHistoryList.appendChild(empty);
+      return;
+    }
+    for (const record of history.slice(0, 20)) {
+      const row = document.createElement('article');
+      row.className = 'exam-history-row';
+      const info = document.createElement('div');
+      info.className = 'exam-history-info';
+      const title = document.createElement('strong');
+      title.textContent = record.title;
+      const details = document.createElement('span');
+      details.textContent = '计划 ' + formatExamDuration(record.durationSeconds)
+        + ' · 实际 ' + formatExamDuration(record.elapsedSeconds)
+        + ' · ' + formatExamDate(record.startedAt);
+      info.append(title, details);
+      const result = document.createElement('span');
+      result.className = 'exam-history-result';
+      result.textContent = getExamResultLabel(record.result);
+      row.append(info, result);
+      examHistoryList.appendChild(row);
+    }
+  }
+
+  function renderExamSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object') return;
+    if (!examFormDirty) populateExamSettings(snapshot.settings || {});
+    const session = snapshot.activeSession;
+    const hasActive = Boolean(session);
+    const running = hasActive && session.status === 'running';
+    const paused = hasActive && session.status === 'paused';
+    const finished = hasActive && session.status === 'finished';
+
+    for (const input of [examTitleInput, examDurationInput, examShowPagesInput, examTotalPagesInput]) {
+      input.disabled = hasActive;
+    }
+    saveExamSettingsButton.disabled = hasActive;
+    startExamButton.disabled = hasActive;
+    pauseExamButton.style.display = running ? 'inline-flex' : 'none';
+    resumeExamButton.style.display = paused ? 'inline-flex' : 'none';
+    endExamEarlyButton.style.display = (running || paused) ? 'inline-flex' : 'none';
+    exitExamButton.style.display = finished ? 'inline-flex' : 'none';
+
+    if (!session) {
+      examCurrentDescription.textContent = '当前没有进行中的考试。';
+      examCurrentBadge.textContent = '未开始';
+      examCurrentBadge.dataset.status = 'idle';
+    } else {
+      examCurrentDescription.textContent = session.title + ' · 计划 ' + formatExamDuration(session.durationSeconds)
+        + ' · 剩余 ' + formatExamDuration(session.remainingSeconds);
+      examCurrentBadge.textContent = finished
+        ? (session.result === 'ended_early' ? '提前结束' : '考试结束')
+        : (paused ? '已暂停' : '计时中');
+      examCurrentBadge.dataset.status = finished ? 'finished' : (paused ? 'paused' : 'running');
+    }
+    renderExamHistory(snapshot.history);
+  }
+
+  async function runExamSettingsAction(action, successMessage) {
+    try {
+      const snapshot = await action();
+      examFormDirty = false;
+      renderExamSnapshot(snapshot);
+      if (successMessage) showExamFormStatus(successMessage, true);
+    } catch (error) {
+      showExamFormStatus(error.message || '操作失败，请稍后重试。');
+    }
+  }
+
+  for (const input of [examTitleInput, examDurationInput, examShowPagesInput, examTotalPagesInput]) {
+    input.addEventListener('input', () => { examFormDirty = true; });
+  }
+  examShowPagesInput.addEventListener('change', () => {
+    examTotalPagesField.classList.toggle('hidden', !examShowPagesInput.checked);
+  });
+
+  saveExamSettingsButton.addEventListener('click', () => runExamSettingsAction(
+    () => window.electronAPI.saveExamSettings(collectExamSettings()),
+    '考试配置已保存。'
+  ));
+  startExamButton.addEventListener('click', () => {
+    if (!examTitleInput.value.trim()) {
+      examTitleInput.focus();
+      showExamFormStatus('请先填写考试名称。');
+      return;
+    }
+    runExamSettingsAction(() => window.electronAPI.startExam(collectExamSettings()), '考试已开始。');
+  });
+  pauseExamButton.addEventListener('click', () => runExamSettingsAction(
+    () => window.electronAPI.pauseExam(), '考试计时已暂停。'
+  ));
+  resumeExamButton.addEventListener('click', () => runExamSettingsAction(
+    () => window.electronAPI.resumeExam(), '考试已继续计时。'
+  ));
+  endExamEarlyButton.addEventListener('click', () => {
+    if (!window.confirm('确定提前结束本场考试并保存记录吗？')) return;
+    runExamSettingsAction(() => window.electronAPI.endExamEarly(), '考试已结束，记录已保存。');
+  });
+  exitExamButton.addEventListener('click', () => {
+    if (!window.confirm('退出考试面板并恢复普通课表？本场考试记录已经保存。')) return;
+    runExamSettingsAction(() => window.electronAPI.exitExam(), '已退出考试模式，普通课表已恢复。');
+  });
+
+  window.electronAPI.on('examStateChanged', (_event, snapshot) => renderExamSnapshot(snapshot));
+  window.electronAPI.getExamState().then(renderExamSnapshot).catch(error => {
+    showExamFormStatus('读取考试状态失败：' + (error.message || '未知错误'));
+  });
+
   document.querySelectorAll('.nav-item').forEach(button => {
     button.addEventListener('click', () => {
       window.electronAPI.logEvent('user.settings_section_changed', { section: button.dataset.section });
