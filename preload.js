@@ -48,7 +48,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     },
     exitExam() {
         return ipcRenderer.invoke('exam:exit');
-    },    getDateOverrides() {
+    },
+    getDateOverrides() {
         return ipcRenderer.invoke('getDateOverrides');
     },
     saveDateOverrides(overrides) {
