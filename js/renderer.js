@@ -165,7 +165,7 @@
   function setSidebar() {
     let date = getCurrentEditedDate()
     const dateOverride = AppStateStore.findDateOverride(date, dateOverrides)
-    if (dateOverride && dateOverride.type === 'holiday') {
+    if (dateOverride && dateOverride.type === 'holiday' && getManualScheduleDay() === null) {
       weekCH.innerText = '放假'
       weekEN.innerText = 'Holiday'
     } else {
