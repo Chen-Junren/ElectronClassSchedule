@@ -225,6 +225,9 @@ function createExamManager(options) {
     function saveSettings(value) {
         const settings = normalizeExamSettings(value);
         const state = readState();
+        if (state.activeSession) {
+            throw new Error('请先退出当前考试，再修改下一场考试的配置');
+        }
         writeState({ ...state, settings });
         return getSnapshot();
     }
