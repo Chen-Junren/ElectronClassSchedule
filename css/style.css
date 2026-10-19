@@ -248,3 +248,55 @@
 .weatherColumnTitle { min-height: 12px; color: var(--weather-muted-text-color, rgba(220, 230, 245, .82)); font-size: 10px; }
 .weatherCurrentRow, .weatherCurrent { margin-top: 0; font-size: 23px; }
 .weatherDescription { display: block; min-height: 13px; margin-top: 1px; font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
+
+
+/* Exam mode overlay: the existing floating schedule is hidden while a session is active. */
+.exam-panel {
+    position: fixed;
+    z-index: 9999;
+    top: var(--top-space, 16px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: max-content;
+    min-width: 300px;
+    max-width: calc(100vw - 24px);
+    padding: 15px 20px 16px;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, .94);
+    border: 1px solid rgba(148, 163, 184, .35);
+    border-radius: var(--global-border-radius, 16px);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, .28);
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    box-sizing: border-box;
+}
+.exam-panel[data-status="paused"] { border-color: rgba(251, 191, 36, .7); }
+.exam-panel[data-status="finished"] {
+    background: rgba(69, 26, 26, .96);
+    border-color: rgba(248, 113, 113, .8);
+}
+.exam-panel-header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; }
+.exam-panel-eyebrow { color:#cbd5e1; font-size:11px; letter-spacing:.06em; }
+.exam-panel-title { margin-top:3px; max-width:420px; overflow-wrap:anywhere; font-size:18px; font-weight:700; }
+.exam-panel-state { flex-shrink:0; padding:4px 8px; border-radius:99px; color:#dcfce7; background:rgba(22,101,52,.65); font-size:11px; }
+.exam-panel[data-status="paused"] .exam-panel-state { color:#fef3c7; background:rgba(146,64,14,.55); }
+.exam-panel[data-status="finished"] .exam-panel-state { color:#fee2e2; background:rgba(153,27,27,.7); }
+.exam-panel-clock {
+    text-align:center; color:#fff; font-family:Consolas,"Courier New",monospace;
+    font-size:clamp(32px,5vw,44px); font-variant-numeric:tabular-nums;
+    font-weight:700; line-height:1.15; letter-spacing:.03em;
+}
+.exam-panel-caption { min-height:16px; text-align:center; color:#cbd5e1; font-size:11px; }
+.exam-panel-pages { text-align:center; color:#e2e8f0; font-size:12px; }
+.exam-panel-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:8px; }
+.exam-panel-button {
+    min-height:32px; padding:7px 12px; border:1px solid rgba(148,163,184,.45);
+    border-radius:8px; color:#f8fafc; background:rgba(51,65,85,.9);
+    font:inherit; font-size:12px; cursor:pointer;
+}
+.exam-panel-button:hover { background:rgba(71,85,105,.98); }
+.exam-panel-button-danger { border-color:rgba(248,113,113,.65); background:rgba(127,29,29,.85); }
+.exam-panel-button-danger:hover { background:rgba(153,27,27,.95); }
+.exam-panel-button:focus-visible { outline:2px solid #93c5fd; outline-offset:2px; }
