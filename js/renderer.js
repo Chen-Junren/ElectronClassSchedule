@@ -424,6 +424,9 @@
       : AppStateStore.resetDayOffset(localStorage)
     dayOffset = state.dayOffset
     setDayOffsetLastDay = state.setDayOffsetLastDay
+    // Recompute and render immediately; a one-second polling tick may not detect
+    // a day switch when adjacent schedules share the same classes/highlight.
+    tick(true)
   })
 
 
