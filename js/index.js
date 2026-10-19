@@ -13,9 +13,28 @@ function getCurrentEditedDate() {
     return date;
 }
 
+function getManualScheduleDay() {
+    const state = AppStateStore.loadState(localStorage);
+    const actualToday = new Date().getDay();
+
+    // A manual choice is active for the current real-world day only. It outranks
+    // date-specific class-day/holiday rules until the user restores automatic mode.
+    if (state.dayOffset >= 0 && state.setDayOffsetLastDay === actualToday) {
+        dayOffset = state.dayOffset;
+        setDayOffsetLastDay = state.setDayOffsetLastDay;
+        return state.dayOffset;
+    }
+
+    return null;
+}
+
 function getCurrentEditedDay(date) {
+    const manualDay = getManualScheduleDay();
+    if (manualDay !== null) return manualDay;
+
     const dateOverride = AppStateStore.findDateOverride(date, dateOverrides);
     if (dateOverride && dateOverride.type === 'classDay') return dateOverride.dayOfWeek;
+
     const actualToday = new Date().getDay();
     const effectiveDay = AppStateStore.getEffectiveDay(localStorage, date, actualToday);
     const state = AppStateStore.loadState(localStorage);
@@ -64,7 +83,7 @@ function getScheduleData() {
     // Use one edited timestamp so schedule, clock and weekday cannot disagree at midnight.
     const date = getCurrentEditedDate();
     const dateOverride = AppStateStore.findDateOverride(date, dateOverrides);
-    if (dateOverride && dateOverride.type === 'holiday') {
+    if (dateOverride && dateOverride.type === 'holiday' && getManualScheduleDay() === null) {
         return {
             scheduleArray: [],
             currentHighlight: { index: null, type: null, fullName: null, countdown: null, countdownText: null },
