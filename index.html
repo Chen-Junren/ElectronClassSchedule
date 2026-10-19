@@ -18,6 +18,7 @@
 </head>
 
 <body>
+  <div class="topBarGroup" id="topBarGroup">
   <div class="globalContainer" id="globalContainer">
     <div class="classContainer background" id="classContainer">
       <div class="class">加</div>
@@ -34,7 +35,6 @@
     <div class="leftSidebar sidebar background" id="leftSidebar"><span id="weekEN" class="t">Load</span><div class="corner options notIgnoreClick" id="weekCH">ing</div></div>
     <div class="rightSidebar sidebar background" id="rightSidebar"><span id="countdownDays" class="t">000</span><div class="corner">天</div></div>
   </div>
-  <div class="miniCountdown" id="miniCountdown">00:00</div>
   <section class="weatherPanel" id="weatherPanel" aria-live="polite" aria-label="天气信息">
     <div class="weatherColumns">
       <div class="weatherColumn weatherCurrentColumn">
@@ -54,6 +54,8 @@
       </div>
     </div>
   </section>
+  </div>
+  <div class="miniCountdown" id="miniCountdown">00:00</div>
 
 </body>
 <script type="text/javascript" src="js/renderer.js"></script>
