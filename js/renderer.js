@@ -192,6 +192,8 @@
     if (!weatherPanel || weatherPanel.style.display === 'none' || getComputedStyle(weatherPanel).display === 'none') return;
     const anchor = rightSidebar.style.display !== 'none' ? rightSidebar : classContainer;
     const anchorRect = anchor.getBoundingClientRect();
+    const globalRect = globalContainer.getBoundingClientRect();
+    weatherPanel.style.marginLeft = Math.max(12, anchorRect.right - globalRect.right + 12) + 'px';
     weatherPanel.style.height = Math.max(0, anchorRect.height) + 'px';
   }
 
