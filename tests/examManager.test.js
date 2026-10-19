@@ -149,3 +149,30 @@ test('invalid or damaged stored data safely falls back to an empty exam state', 
     const store = createStore('damaged');
     assert.equal(createExamManager({ store }).getSnapshot().activeSession, null);
 });
+
+
+test('exam settings stay locked until the finished session is explicitly exited', () => {
+    const { manager, advance } = setup();
+    manager.start(validSettings);
+    assert.throws(
+        () => manager.saveSettings({ ...validSettings, title: '下一场考试' }),
+        /先退出当前考试/
+    );
+
+    manager.pause();
+    assert.throws(
+        () => manager.saveSettings({ ...validSettings, title: '下一场考试' }),
+        /先退出当前考试/
+    );
+
+    manager.endEarly();
+    assert.throws(
+        () => manager.saveSettings({ ...validSettings, title: '下一场考试' }),
+        /先退出当前考试/
+    );
+
+    manager.exit();
+    const saved = manager.saveSettings({ ...validSettings, title: '下一场考试' });
+    assert.equal(saved.settings.title, '下一场考试');
+    assert.equal(saved.activeSession, null);
+});
