@@ -44,6 +44,24 @@
       </div>
   </section>
   </div>
+  <section id="examPanel" class="exam-panel notIgnoreClick" aria-live="polite" aria-label="考试计时面板" style="display:none">
+    <div class="exam-panel-header">
+      <div>
+        <div class="exam-panel-eyebrow" id="examPanelEyebrow">考试进行中</div>
+        <div class="exam-panel-title" id="examPanelTitle">考试</div>
+      </div>
+      <div class="exam-panel-state" id="examPanelState">计时中</div>
+    </div>
+    <div class="exam-panel-clock" id="examPanelClock">02:00:00</div>
+    <div class="exam-panel-caption" id="examPanelCaption">剩余时间</div>
+    <div class="exam-panel-pages" id="examPanelPages" style="display:none"></div>
+    <div class="exam-panel-actions">
+      <button type="button" id="examPanelPause" class="exam-panel-button notIgnoreClick">暂停</button>
+      <button type="button" id="examPanelResume" class="exam-panel-button notIgnoreClick" style="display:none">继续</button>
+      <button type="button" id="examPanelEnd" class="exam-panel-button exam-panel-button-danger notIgnoreClick">结束考试</button>
+      <button type="button" id="examPanelExit" class="exam-panel-button notIgnoreClick" style="display:none">退出考试并恢复课表</button>
+    </div>
+  </section>
   <div class="miniCountdown" id="miniCountdown">00:00</div>
 
 </body>
