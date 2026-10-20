@@ -176,3 +176,38 @@ test('exam settings stay locked until the finished session is explicitly exited'
     assert.equal(saved.settings.title, '下一场考试');
     assert.equal(saved.activeSession, null);
 });
+
+test('restart recovery completes a running exam when its deadline passed while closed', () => {
+    const { manager, advance, store } = setup();
+    manager.start({ ...validSettings, durationMinutes: 2 });
+    advance(30 * 1000);
+    const reloadedManager = createExamManager({
+        store,
+        now: () => Date.parse('2026-10-19T08:03:00.000Z'),
+        createId: () => 'unused'
+    });
+
+    const restored = reloadedManager.resumeAfterRestart();
+    assert.equal(restored.activeSession.status, 'finished');
+    assert.equal(restored.activeSession.result, 'completed');
+    assert.equal(restored.activeSession.remainingSeconds, 0);
+    assert.equal(restored.history.length, 1);
+    assert.equal(restored.history[0].result, 'completed');
+    assert.equal(restored.history[0].elapsedSeconds, 120);
+});
+
+test('explicitly choosing interruption records interruption even if the deadline passed while closed', () => {
+    const { manager, store } = setup();
+    manager.start({ ...validSettings, durationMinutes: 2 });
+    const reloadedManager = createExamManager({
+        store,
+        now: () => Date.parse('2026-10-19T08:03:00.000Z'),
+        createId: () => 'unused'
+    });
+
+    const interrupted = reloadedManager.interruptForRestart();
+    assert.equal(interrupted.activeSession, null);
+    assert.equal(interrupted.history.length, 1);
+    assert.equal(interrupted.history[0].result, 'interrupted');
+    assert.equal(interrupted.history[0].elapsedSeconds, 120);
+});
