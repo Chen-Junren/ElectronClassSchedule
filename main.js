@@ -13,6 +13,7 @@ const { loadDateOverrides, saveDateOverrides } = require('./electron/dateOverrid
 const { loadAppearanceSettings, saveAppearanceSettings } = require('./electron/appearanceSettingsStore');
 const { createLogger } = require('./electron/logger');
 const { createExamManager } = require('./electron/examManager');
+const { createExamStateBroadcaster } = require('./electron/examStateBroadcaster');
 
 const store = new Store();
 const examManager = createExamManager({ store });
@@ -35,35 +36,11 @@ process.on('unhandledRejection', (reason) => {
 });
 let settingsWindow = null;
 let examTicker = null;
-let lastExamBroadcastSignature = '';
-
-function examStateSignature(snapshot) {
-    const active = snapshot.activeSession;
-    return JSON.stringify({
-        settings: snapshot.settings,
-        active: active ? {
-            id: active.id,
-            title: active.title,
-            status: active.status,
-            result: active.result,
-            remainingSeconds: active.remainingSeconds,
-            elapsedSeconds: active.elapsedSeconds,
-            showPageCount: active.showPageCount,
-            totalPages: active.totalPages
-        } : null,
-        history: snapshot.history.map(item => ({ id: item.id, result: item.result, endedAt: item.endedAt }))
-    });
-}
-
-function broadcastExamState(force = false, suppliedSnapshot = null) {
-    const snapshot = suppliedSnapshot || examManager.getSnapshot();
-    const signature = examStateSignature(snapshot);
-    if (!force && signature === lastExamBroadcastSignature) return snapshot;
-    lastExamBroadcastSignature = signature;
-    if (win && !win.isDestroyed()) win.webContents.send('examStateChanged', snapshot);
-    if (settingsWindow && !settingsWindow.isDestroyed()) settingsWindow.webContents.send('examStateChanged', snapshot);
-    return snapshot;
-}
+const examStateBroadcaster = createExamStateBroadcaster({
+    getSnapshot: () => examManager.getSnapshot(),
+    getWindows: () => [win, settingsWindow]
+});
+const broadcastExamState = (...args) => examStateBroadcaster.broadcast(...args);
 
 async function resolvePendingExamOnStartup() {
     const pending = examManager.getPersistedActiveSession();
