@@ -14,6 +14,7 @@ const { loadAppearanceSettings, saveAppearanceSettings } = require('./electron/a
 const { createLogger } = require('./electron/logger');
 const { createExamManager } = require('./electron/examManager');
 const { createExamStateBroadcaster } = require('./electron/examStateBroadcaster');
+const { resolvePendingExamOnStartup: resolvePendingExamOnStartupFlow } = require('./electron/examStartupRecovery');
 
 const store = new Store();
 const examManager = createExamManager({ store });
@@ -43,32 +44,7 @@ const examStateBroadcaster = createExamStateBroadcaster({
 const broadcastExamState = (...args) => examStateBroadcaster.broadcast(...args);
 
 async function resolvePendingExamOnStartup() {
-    const pending = examManager.getPersistedActiveSession();
-    if (!pending || !['running', 'paused'].includes(pending.status)) return;
-
-    const isPaused = pending.status === 'paused';
-    try {
-        const choice = await dialog.showMessageBox({
-            type: 'question',
-            title: '上次的考试尚未结束',
-            message: '检测到一场尚未结束的考试：' + pending.title,
-            detail: isPaused
-                ? '上次关闭前计时处于暂停状态。恢复后仍保持暂停；也可以结束并将本场记为中断。'
-                : '恢复后将按真实经过的时间重新计算剩余时间；也可以结束并将本场记为中断。',
-            buttons: ['恢复考试', '结束并记录中断'],
-            defaultId: 0,
-            cancelId: 0,
-            noLink: true
-        });
-        if (choice.response === 1) {
-            examManager.interruptForRestart();
-        } else {
-            examManager.resumeAfterRestart();
-        }
-    } catch (error) {
-        logger.error('exam.startup_recovery_prompt_failed', error);
-        examManager.resumeAfterRestart();
-    }
+    return resolvePendingExamOnStartupFlow({ examManager, dialog, logger });
 }
 
 const getBasePath = () => __dirname + path.sep;
