@@ -429,8 +429,16 @@
     runExamSettingsAction(() => window.electronAPI.exitExam(), '已退出考试模式，普通课表已恢复。');
   });
 
-  window.electronAPI.on('examStateChanged', (_event, snapshot) => renderExamSnapshot(snapshot));
-  window.electronAPI.getExamState().then(renderExamSnapshot).catch(error => {
+  let examStateEventVersion = 0;
+  window.electronAPI.on('examStateChanged', (_event, snapshot) => {
+    examStateEventVersion += 1;
+    renderExamSnapshot(snapshot);
+  });
+  const initialExamStateEventVersion = examStateEventVersion;
+  window.electronAPI.getExamState().then(snapshot => {
+    // Do not let a delayed initial response overwrite a newer broadcast from the main process.
+    if (examStateEventVersion === initialExamStateEventVersion) renderExamSnapshot(snapshot);
+  }).catch(error => {
     showExamFormStatus('读取考试状态失败：' + (error.message || '未知错误'));
   });
 
