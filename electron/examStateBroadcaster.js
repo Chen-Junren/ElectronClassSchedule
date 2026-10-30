@@ -23,6 +23,7 @@ function createExamStateBroadcaster(options) {
         throw new TypeError('Exam state broadcaster requires getSnapshot and getWindows functions');
     }
 
+    const onError = typeof options.onError === 'function' ? options.onError : null;
     let lastSignature = '';
 
     function broadcast(force = false, suppliedSnapshot = null) {
@@ -34,7 +35,11 @@ function createExamStateBroadcaster(options) {
         for (const window of options.getWindows()) {
             if (!window || (typeof window.isDestroyed === 'function' && window.isDestroyed())) continue;
             if (!window.webContents || typeof window.webContents.send !== 'function') continue;
-            window.webContents.send('examStateChanged', snapshot);
+            try {
+                window.webContents.send('examStateChanged', snapshot);
+            } catch (error) {
+                if (onError) onError(error, window);
+            }
         }
         return snapshot;
     }
