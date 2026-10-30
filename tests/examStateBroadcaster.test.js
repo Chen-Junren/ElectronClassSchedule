@@ -110,3 +110,24 @@ test('exam state signature ignores server clock but includes timer and history c
     };
     assert.notEqual(examStateSignature(first), examStateSignature(second));
 });
+
+test('a failed window delivery does not prevent broadcasting to other windows', () => {
+    const deliveryError = new Error('renderer unavailable');
+    const errors = [];
+    const broken = {
+        isDestroyed: () => false,
+        webContents: { send: () => { throw deliveryError; } }
+    };
+    const healthy = fakeWindow();
+    const broadcaster = createExamStateBroadcaster({
+        getSnapshot: () => snapshot(),
+        getWindows: () => [broken, healthy],
+        onError: (error, window) => errors.push({ error, window })
+    });
+
+    assert.doesNotThrow(() => broadcaster.broadcast());
+    assert.equal(errors.length, 1);
+    assert.equal(errors[0].error, deliveryError);
+    assert.equal(errors[0].window, broken);
+    assert.equal(healthy.messages.length, 1);
+});
