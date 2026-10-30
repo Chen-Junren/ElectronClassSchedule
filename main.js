@@ -39,7 +39,8 @@ let settingsWindow = null;
 let examTicker = null;
 const examStateBroadcaster = createExamStateBroadcaster({
     getSnapshot: () => examManager.getSnapshot(),
-    getWindows: () => [win, settingsWindow]
+    getWindows: () => [win, settingsWindow],
+    onError: (error) => logger.error('exam.state_broadcast_failed', error)
 });
 const broadcastExamState = (...args) => examStateBroadcaster.broadcast(...args);
 
