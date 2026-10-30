@@ -352,8 +352,16 @@
     () => ipcRenderer.exitExam(),
     '退出考试面板并恢复普通课表？本场考试记录已经保存。'
   ));
-  ipcRenderer.on('examStateChanged', (_event, snapshot) => applyExamSnapshot(snapshot));
-  ipcRenderer.getExamState().then(applyExamSnapshot).catch(error => {
+  let examStateEventVersion = 0;
+  ipcRenderer.on('examStateChanged', (_event, snapshot) => {
+    examStateEventVersion += 1;
+    applyExamSnapshot(snapshot);
+  });
+  const initialExamStateEventVersion = examStateEventVersion;
+  ipcRenderer.getExamState().then(snapshot => {
+    // An event may arrive before the initial IPC response; never let that older response win.
+    if (examStateEventVersion === initialExamStateEventVersion) applyExamSnapshot(snapshot);
+  }).catch(error => {
     console.warn('[exam] Failed to load exam state:', error);
   });
 
